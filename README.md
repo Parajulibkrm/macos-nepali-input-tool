@@ -17,6 +17,18 @@ A english-nepali transliteration *cloud* input method that uses [Google Input To
   ./build.sh
   ``` 
 
+if you get this error
+  
+  ```
+   xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory '/Library/Developer/CommandLineTools' is a command line tools instance
+  ```
+  
+  then run this command
+  
+  ```
+  sudo xcode-select -r
+  ```
+
 > The output will be `Users/[username]/Library/Input\ Methods/GoogleInputTools.app`
 
 3. Open `System Preferences` -> `Keyboard` -> `Input Sources`, click `+` to add a new input method, choose `English` -> `Google Input Tools`.
