@@ -210,13 +210,16 @@ class GoogleInputToolsController: IMKInputController {
                 let keyValue = Int(key.hexDigitValue!)
                 let count = InputContext.shared.candidates.count
 
-                if keyValue >= 1 && keyValue <= count {
+                if (count > 0) && (keyValue > 0) && (keyValue <= count) {
                     InputContext.shared.currentIndex = keyValue - 1
                     commitCandidate(client: sender)
                     return true
                 }
-
-                return false
+                else {
+                    InputContext.shared.composeString.append(inputString)
+                    updateCandidatesWindow()
+                    return true
+                }
             }
 
             else if event.keyCode == kVK_LeftArrow || event.keyCode == kVK_RightArrow {
