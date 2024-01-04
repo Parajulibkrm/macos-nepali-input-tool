@@ -29,7 +29,8 @@ A english-nepali transliteration *cloud* input method that uses [Google Input To
   ```
 
 ## Screenshot
-[![Screenshot](https://raw.githubusercontent.com/ParajuliBkrm/macos-nepali-input-tool/main/screenshots/demo.gif)](https://raw.githubusercontent.com/ParajuliBkrm/macos-nepali-input-tool/main/screenshots/demo.gif)
+
+<img width="555" alt="screenshot" src="https://github.com/Parajulibkrm/macos-nepali-input-tool/blob/main/screenshots/demo.gif?raw=true">
 
 ## Progress
 
