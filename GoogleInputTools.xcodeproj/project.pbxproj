@@ -1,0 +1,383 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		4D07405326E007B5007FE390 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4D07405226E007B5007FE390 /* InfoPlist.strings */; };
+		4D3B7ACD26D3F30C008C1A4B /* UISettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D3B7ACC26D3F30C008C1A4B /* UISettings.swift */; };
+		4D73286C26D297BD00970795 /* CloudInputEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D73286B26D297BD00970795 /* CloudInputEngine.swift */; };
+		4DCA724E26D2331900E53537 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4DCA724D26D2331900E53537 /* Assets.xcassets */; };
+		4DCA725126D2331900E53537 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4DCA725026D2331900E53537 /* Preview Assets.xcassets */; };
+		4DCA725426D2331900E53537 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4DCA725226D2331900E53537 /* Main.storyboard */; };
+		4DCA725D26D233B700E53537 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DCA725C26D233B700E53537 /* main.swift */; };
+		4DCA725F26D2368B00E53537 /* GoogleInputToolsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DCA725E26D2368B00E53537 /* GoogleInputToolsController.swift */; };
+		4DCA726126D246DF00E53537 /* InputContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DCA726026D246DF00E53537 /* InputContext.swift */; };
+		4DCA726326D249F600E53537 /* CandidatesWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DCA726226D249F600E53537 /* CandidatesWindow.swift */; };
+		4DCA726526D24A1700E53537 /* CandidatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DCA726426D24A1700E53537 /* CandidatesView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		4D07405226E007B5007FE390 /* InfoPlist.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
+		4D3B7ACC26D3F30C008C1A4B /* UISettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UISettings.swift; sourceTree = "<group>"; };
+		4D73286B26D297BD00970795 /* CloudInputEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudInputEngine.swift; sourceTree = "<group>"; };
+		4DCA724626D2331700E53537 /* GoogleInputTools.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GoogleInputTools.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4DCA724D26D2331900E53537 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4DCA725026D2331900E53537 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		4DCA725326D2331900E53537 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		4DCA725526D2331900E53537 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4DCA725626D2331900E53537 /* GoogleInputTools.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GoogleInputTools.entitlements; sourceTree = "<group>"; };
+		4DCA725C26D233B700E53537 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		4DCA725E26D2368B00E53537 /* GoogleInputToolsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleInputToolsController.swift; sourceTree = "<group>"; };
+		4DCA726026D246DF00E53537 /* InputContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputContext.swift; sourceTree = "<group>"; };
+		4DCA726226D249F600E53537 /* CandidatesWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CandidatesWindow.swift; sourceTree = "<group>"; };
+		4DCA726426D24A1700E53537 /* CandidatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CandidatesView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4DCA724326D2331700E53537 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4DCA723D26D2331700E53537 = {
+			isa = PBXGroup;
+			children = (
+				4DCA724826D2331700E53537 /* GoogleInputTools */,
+				4DCA724726D2331700E53537 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		4DCA724726D2331700E53537 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4DCA724626D2331700E53537 /* GoogleInputTools.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4DCA724826D2331700E53537 /* GoogleInputTools */ = {
+			isa = PBXGroup;
+			children = (
+				4DCA725626D2331900E53537 /* GoogleInputTools.entitlements */,
+				4DCA725526D2331900E53537 /* Info.plist */,
+				4DCA725E26D2368B00E53537 /* GoogleInputToolsController.swift */,
+				4DCA726026D246DF00E53537 /* InputContext.swift */,
+				4DCA725C26D233B700E53537 /* main.swift */,
+				4DCA724D26D2331900E53537 /* Assets.xcassets */,
+				4DCA725226D2331900E53537 /* Main.storyboard */,
+				4DCA724F26D2331900E53537 /* Preview Content */,
+				4DCA726226D249F600E53537 /* CandidatesWindow.swift */,
+				4DCA726426D24A1700E53537 /* CandidatesView.swift */,
+				4D73286B26D297BD00970795 /* CloudInputEngine.swift */,
+				4D3B7ACC26D3F30C008C1A4B /* UISettings.swift */,
+				4D07405226E007B5007FE390 /* InfoPlist.strings */,
+			);
+			path = GoogleInputTools;
+			sourceTree = "<group>";
+		};
+		4DCA724F26D2331900E53537 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				4DCA725026D2331900E53537 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		4DCA724526D2331700E53537 /* GoogleInputTools */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4DCA725926D2331900E53537 /* Build configuration list for PBXNativeTarget "GoogleInputTools" */;
+			buildPhases = (
+				4DCA724226D2331700E53537 /* Sources */,
+				4DCA724326D2331700E53537 /* Frameworks */,
+				4DCA724426D2331700E53537 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GoogleInputTools;
+			productName = GoogleInputTools;
+			productReference = 4DCA724626D2331700E53537 /* GoogleInputTools.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4DCA723E26D2331700E53537 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1250;
+				LastUpgradeCheck = 1250;
+				TargetAttributes = {
+					4DCA724526D2331700E53537 = {
+						CreatedOnToolsVersion = 12.5.1;
+					};
+				};
+			};
+			buildConfigurationList = 4DCA724126D2331700E53537 /* Build configuration list for PBXProject "GoogleInputTools" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 4DCA723D26D2331700E53537;
+			productRefGroup = 4DCA724726D2331700E53537 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				4DCA724526D2331700E53537 /* GoogleInputTools */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4DCA724426D2331700E53537 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4DCA725426D2331900E53537 /* Main.storyboard in Resources */,
+				4D07405326E007B5007FE390 /* InfoPlist.strings in Resources */,
+				4DCA725126D2331900E53537 /* Preview Assets.xcassets in Resources */,
+				4DCA724E26D2331900E53537 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4DCA724226D2331700E53537 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4D3B7ACD26D3F30C008C1A4B /* UISettings.swift in Sources */,
+				4DCA725F26D2368B00E53537 /* GoogleInputToolsController.swift in Sources */,
+				4DCA726326D249F600E53537 /* CandidatesWindow.swift in Sources */,
+				4DCA725D26D233B700E53537 /* main.swift in Sources */,
+				4DCA726126D246DF00E53537 /* InputContext.swift in Sources */,
+				4D73286C26D297BD00970795 /* CloudInputEngine.swift in Sources */,
+				4DCA726526D24A1700E53537 /* CandidatesView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		4DCA725226D2331900E53537 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4DCA725326D2331900E53537 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		4DCA725726D2331900E53537 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		4DCA725826D2331900E53537 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		4DCA725A26D2331900E53537 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_ENTITLEMENTS = GoogleInputTools/GoogleInputTools.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = $SYMROOT/$CONFIGURATION;
+				DEVELOPMENT_ASSET_PATHS = "\"GoogleInputTools/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = GoogleInputTools/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Nepali Input Tools";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ParajuliBkrm.inputmethod.GoogleInputTools;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		4DCA725B26D2331900E53537 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_ENTITLEMENTS = GoogleInputTools/GoogleInputTools.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = $SYMROOT/$CONFIGURATION;
+				DEVELOPMENT_ASSET_PATHS = "\"GoogleInputTools/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = GoogleInputTools/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Nepali Input Tools";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ParajuliBkrm.inputmethod.GoogleInputTools;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4DCA724126D2331700E53537 /* Build configuration list for PBXProject "GoogleInputTools" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4DCA725726D2331900E53537 /* Debug */,
+				4DCA725826D2331900E53537 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4DCA725926D2331900E53537 /* Build configuration list for PBXNativeTarget "GoogleInputTools" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4DCA725A26D2331900E53537 /* Debug */,
+				4DCA725B26D2331900E53537 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4DCA723E26D2331700E53537 /* Project object */;
+}

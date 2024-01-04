@@ -1,0 +1,1 @@
+swift-format format --in-place --recursive .

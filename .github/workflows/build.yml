@@ -1,0 +1,33 @@
+name: CI
+ 
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [x86_64, arm64]
+
+    steps:
+      # Checks-out repository under $GITHUB_WORKSPACE
+      - uses: actions/checkout@v2
+
+      - name: Xcodebuild Action
+        # You may pin to the exact commit or the version.
+        # uses: sersoft-gmbh/xcodebuild-action@349a5f8426171a9680acbca22585d2af4c09a5d6
+        uses: sersoft-gmbh/xcodebuild-action@v1.6.0
+        with:
+          project: GoogleInputTools.xcodeproj
+          scheme: GoogleInputTools
+          configuration: Debug
+          arch: ${{ matrix.arch }}
+          action: build
+          use-xcpretty: false
