@@ -32,11 +32,16 @@ jobs:
           action: build
           use-xcpretty: false
 
+      # Debug step to check build output location
+      - name: Debug - List build directory
+        run: |
+          ls -R build/Release/
+          
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: GoogleInputTools-${{ matrix.arch }}
-          path: build/Release/GoogleInputTools.app
+          name: build-${{ matrix.arch }}
+          path: build/Release/
           retention-days: 1
 
   release:
@@ -54,15 +59,20 @@ jobs:
       - name: Download x86_64 build
         uses: actions/download-artifact@v4
         with:
-          name: GoogleInputTools-x86_64
-          path: dist/x86_64/GoogleInputTools.app
+          name: build-x86_64
+          path: dist/x86_64
 
       # Download Apple Silicon build
       - name: Download arm64 build
         uses: actions/download-artifact@v4
         with:
-          name: GoogleInputTools-arm64
-          path: dist/arm64/GoogleInputTools.app
+          name: build-arm64
+          path: dist/arm64
+
+      # Debug step to check downloaded artifacts
+      - name: Debug - List dist directory
+        run: |
+          ls -R dist/
 
       # Create versioned release tag
       - name: Generate release tag
@@ -74,8 +84,8 @@ jobs:
       - name: Archive builds
         run: |
           cd dist
-          zip -r GoogleInputTools-x86_64.zip x86_64/GoogleInputTools.app
-          zip -r GoogleInputTools-arm64.zip arm64/GoogleInputTools.app
+          zip -r GoogleInputTools-x86_64.zip x86_64/
+          zip -r GoogleInputTools-arm64.zip arm64/
 
       # Create GitHub release
       - name: Create Release
