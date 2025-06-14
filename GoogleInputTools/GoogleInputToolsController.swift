@@ -223,7 +223,7 @@ class GoogleInputToolsController: IMKInputController {
             }
 
             // Handle Purnabiram (|)
-            else if key == "|" {
+            else if key == "/" {
                 client().insertText("।", replacementRange: NSMakeRange(NSNotFound, NSNotFound))
                 return true
             }
