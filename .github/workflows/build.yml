@@ -37,6 +37,7 @@ jobs:
         with:
           name: GoogleInputTools-${{ matrix.arch }}
           path: build/Release/GoogleInputTools.app
+          retention-days: 1
 
   release:
     needs: build
@@ -45,11 +46,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      # Download all build artifacts
-      - name: Download build artifacts
+      # Create directories
+      - name: Create directories
+        run: mkdir -p dist/{x86_64,arm64}
+
+      # Download Intel build
+      - name: Download x86_64 build
         uses: actions/download-artifact@v4
         with:
-          path: dist
+          name: GoogleInputTools-x86_64
+          path: dist/x86_64/GoogleInputTools.app
+
+      # Download Apple Silicon build
+      - name: Download arm64 build
+        uses: actions/download-artifact@v4
+        with:
+          name: GoogleInputTools-arm64
+          path: dist/arm64/GoogleInputTools.app
 
       # Create versioned release tag
       - name: Generate release tag
@@ -61,8 +74,8 @@ jobs:
       - name: Archive builds
         run: |
           cd dist
-          zip -r GoogleInputTools-x86_64.zip GoogleInputTools-x86_64
-          zip -r GoogleInputTools-arm64.zip GoogleInputTools-arm64
+          zip -r GoogleInputTools-x86_64.zip x86_64/GoogleInputTools.app
+          zip -r GoogleInputTools-arm64.zip arm64/GoogleInputTools.app
 
       # Create GitHub release
       - name: Create Release
