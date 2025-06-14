@@ -18,7 +18,7 @@ jobs:
 
     steps:
       # Checks-out repository under $GITHUB_WORKSPACE
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Xcodebuild Action
         # You may pin to the exact commit or the version.
@@ -33,7 +33,7 @@ jobs:
           use-xcpretty: false
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: GoogleInputTools-${{ matrix.arch }}
           path: build/Release/GoogleInputTools.app
@@ -43,11 +43,11 @@ jobs:
     runs-on: macos-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       
       # Download all build artifacts
       - name: Download build artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           path: dist
 
@@ -55,7 +55,7 @@ jobs:
       - name: Generate release tag
         id: tag
         run: |
-          echo "::set-output name=release_tag::release-$(date +'%Y.%m.%d-%H%M')"
+          echo "release_tag=release-$(date +'%Y.%m.%d-%H%M')" >> $GITHUB_OUTPUT
 
       # Archive the builds
       - name: Archive builds
@@ -67,12 +67,12 @@ jobs:
       # Create GitHub release
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.tag.outputs.release_tag }}
-          release_name: Release ${{ steps.tag.outputs.release_tag }}
+          name: Release ${{ steps.tag.outputs.release_tag }}
           body: |
             GoogleInputTools Input Method for macOS
             
@@ -86,25 +86,6 @@ jobs:
             5. Enable the input method in System Settings > Keyboard > Input Sources
           draft: false
           prerelease: false
-
-      # Upload Intel build
-      - name: Upload x86_64 Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/GoogleInputTools-x86_64.zip
-          asset_name: GoogleInputTools-x86_64.zip
-          asset_content_type: application/zip
-
-      # Upload Apple Silicon build
-      - name: Upload arm64 Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/GoogleInputTools-arm64.zip
-          asset_name: GoogleInputTools-arm64.zip
-          asset_content_type: application/zip
+          files: |
+            ./dist/GoogleInputTools-x86_64.zip
+            ./dist/GoogleInputTools-arm64.zip
