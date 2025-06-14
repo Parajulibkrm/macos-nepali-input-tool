@@ -31,3 +31,44 @@ jobs:
           arch: ${{ matrix.arch }}
           action: build
           use-xcpretty: false
+
+  release:
+    needs: build
+    runs-on: macos-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v2
+
+      # Build steps (repeat or call a reusable workflow)
+      # ... your build steps here ...
+
+      # Archive the build output
+      - name: Archive build
+        run: |
+          mkdir -p dist
+          cp -R path/to/your/output dist/
+          cd dist
+          zip -r build.zip .
+
+      # Create a GitHub release
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.sha }}
+          release_name: Release ${{ github.sha }}
+          draft: false
+          prerelease: false
+
+      # Upload the build artifact
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/build.zip
+          asset_name: build.zip
+          asset_content_type: application/zip
