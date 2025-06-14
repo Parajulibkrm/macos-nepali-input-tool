@@ -42,11 +42,18 @@ jobs:
       - name: Prepare build artifacts
         run: |
           mkdir -p build/Release
-          # Find the .app file and copy it to the build/Release directory
+          
+          # Find and copy the .app bundle
           find ./DerivedData -name "*.app" -exec cp -R {} build/Release/ \;
+          
+          # Find and copy all Swift module files
+          mkdir -p build/Release/SwiftSupport
+          find ./DerivedData -name "*.swiftmodule" -exec cp -R {} build/Release/SwiftSupport/ \;
           
           echo "Contents of build/Release directory:"
           ls -la build/Release/
+          echo "Contents of SwiftSupport directory:"
+          ls -la build/Release/SwiftSupport/
           
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -84,6 +91,11 @@ jobs:
           fi
           echo "Contents of x86_64 directory:"
           ls -R dist/x86_64
+          # Verify SwiftSupport exists
+          if [ ! -d "dist/x86_64/SwiftSupport" ]; then
+            echo "Error: SwiftSupport directory not found in x86_64 build"
+            exit 1
+          fi
 
       # Download Apple Silicon build
       - name: Download arm64 build
@@ -101,6 +113,11 @@ jobs:
           fi
           echo "Contents of arm64 directory:"
           ls -R dist/arm64
+          # Verify SwiftSupport exists
+          if [ ! -d "dist/arm64/SwiftSupport" ]; then
+            echo "Error: SwiftSupport directory not found in arm64 build"
+            exit 1
+          fi
 
       # Debug step to check downloaded artifacts
       - name: Debug - List dist directory
@@ -145,7 +162,7 @@ jobs:
                - Intel Macs: GoogleInputTools-x86_64.zip
                - Apple Silicon Macs: GoogleInputTools-arm64.zip
             2. Unzip the file
-            3. Copy GoogleInputTools.app to ~/Library/Input Methods/
+            3. Copy GoogleInputTools.app and SwiftSupport directory to ~/Library/Input Methods/
             4. Log out and log back in
             5. Enable the input method in System Settings > Keyboard > Input Sources
           draft: false
