@@ -48,6 +48,8 @@ jobs:
     needs: build
     runs-on: macos-latest
     if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       
@@ -61,6 +63,14 @@ jobs:
         with:
           name: build-x86_64
           path: dist/x86_64
+          
+      # Verify x86_64 download
+      - name: Verify x86_64 download
+        run: |
+          if [ ! -d "dist/x86_64" ] || [ -z "$(ls -A dist/x86_64)" ]; then
+            echo "Error: x86_64 build artifacts not found"
+            exit 1
+          fi
 
       # Download Apple Silicon build
       - name: Download arm64 build
@@ -68,6 +78,14 @@ jobs:
         with:
           name: build-arm64
           path: dist/arm64
+          
+      # Verify arm64 download
+      - name: Verify arm64 download
+        run: |
+          if [ ! -d "dist/arm64" ] || [ -z "$(ls -A dist/arm64)" ]; then
+            echo "Error: arm64 build artifacts not found"
+            exit 1
+          fi
 
       # Debug step to check downloaded artifacts
       - name: Debug - List dist directory
@@ -86,6 +104,14 @@ jobs:
           cd dist
           zip -r GoogleInputTools-x86_64.zip x86_64/
           zip -r GoogleInputTools-arm64.zip arm64/
+          
+      # Verify archives were created
+      - name: Verify archives
+        run: |
+          if [ ! -f "dist/GoogleInputTools-x86_64.zip" ] || [ ! -f "dist/GoogleInputTools-arm64.zip" ]; then
+            echo "Error: ZIP archives not created successfully"
+            exit 1
+          fi
 
       # Create GitHub release
       - name: Create Release
