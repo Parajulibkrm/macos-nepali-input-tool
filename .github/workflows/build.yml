@@ -27,10 +27,16 @@ jobs:
         with:
           project: GoogleInputTools.xcodeproj
           scheme: GoogleInputTools
-          configuration: Debug
+          configuration: Release
           arch: ${{ matrix.arch }}
           action: build
           use-xcpretty: false
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: GoogleInputTools-${{ matrix.arch }}
+          path: build/Release/GoogleInputTools.app
 
   release:
     needs: build
@@ -38,37 +44,67 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v2
+      
+      # Download all build artifacts
+      - name: Download build artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: dist
 
-      # Build steps (repeat or call a reusable workflow)
-      # ... your build steps here ...
-
-      # Archive the build output
-      - name: Archive build
+      # Create versioned release tag
+      - name: Generate release tag
+        id: tag
         run: |
-          mkdir -p dist
-          cp -R path/to/your/output dist/
-          cd dist
-          zip -r build.zip .
+          echo "::set-output name=release_tag::release-$(date +'%Y.%m.%d-%H%M')"
 
-      # Create a GitHub release
+      # Archive the builds
+      - name: Archive builds
+        run: |
+          cd dist
+          zip -r GoogleInputTools-x86_64.zip GoogleInputTools-x86_64
+          zip -r GoogleInputTools-arm64.zip GoogleInputTools-arm64
+
+      # Create GitHub release
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.sha }}
-          release_name: Release ${{ github.sha }}
+          tag_name: ${{ steps.tag.outputs.release_tag }}
+          release_name: Release ${{ steps.tag.outputs.release_tag }}
+          body: |
+            GoogleInputTools Input Method for macOS
+            
+            Installation:
+            1. Download the appropriate version for your Mac:
+               - Intel Macs: GoogleInputTools-x86_64.zip
+               - Apple Silicon Macs: GoogleInputTools-arm64.zip
+            2. Unzip the file
+            3. Copy GoogleInputTools.app to ~/Library/Input Methods/
+            4. Log out and log back in
+            5. Enable the input method in System Settings > Keyboard > Input Sources
           draft: false
           prerelease: false
 
-      # Upload the build artifact
-      - name: Upload Release Asset
+      # Upload Intel build
+      - name: Upload x86_64 Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/build.zip
-          asset_name: build.zip
+          asset_path: ./dist/GoogleInputTools-x86_64.zip
+          asset_name: GoogleInputTools-x86_64.zip
+          asset_content_type: application/zip
+
+      # Upload Apple Silicon build
+      - name: Upload arm64 Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/GoogleInputTools-arm64.zip
+          asset_name: GoogleInputTools-arm64.zip
           asset_content_type: application/zip
