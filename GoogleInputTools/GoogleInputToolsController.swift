@@ -222,6 +222,22 @@ class GoogleInputToolsController: IMKInputController {
                 }
             }
 
+            // Handle Purnabiram (|)
+            else if key == "|" {
+                client().insertText("।", replacementRange: NSMakeRange(NSNotFound, NSNotFound))
+                return true
+            }
+
+            // Handle Devanagari numbers (०-९)
+            else if event.modifierFlags.contains(NSEvent.ModifierFlags.option) && key.isNumber {
+                let devanagariNumbers = ["०", "१", "२", "३", "४", "५", "६", "७", "८", "९"]
+                let keyValue = Int(key.hexDigitValue!)
+                if keyValue >= 0 && keyValue <= 9 {
+                    client().insertText(devanagariNumbers[keyValue], replacementRange: NSMakeRange(NSNotFound, NSNotFound))
+                    return true
+                }
+            }
+
             else if event.keyCode == kVK_LeftArrow || event.keyCode == kVK_RightArrow {
 
                 if event.keyCode == kVK_LeftArrow && InputContext.shared.currentIndex > 0 {
