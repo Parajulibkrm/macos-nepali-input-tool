@@ -130,20 +130,41 @@ jobs:
         run: |
           echo "release_tag=release-$(date +'%Y.%m.%d-%H%M')" >> $GITHUB_OUTPUT
 
-      # Archive the builds
-      - name: Archive builds
+      # Build DMG images
+      - name: Build DMG images
         run: |
-          cd dist
-          zip -r GoogleInputTools-x86_64.zip x86_64/
-          zip -r GoogleInputTools-arm64.zip arm64/
-          
-      # Verify archives were created
-      - name: Verify archives
+          set -euo pipefail
+          for arch in x86_64 arm64; do
+            staging="dist/dmg-${arch}"
+            mkdir -p "${staging}"
+            cp -R "dist/${arch}/"*.app "${staging}/"
+            if [ -d "dist/${arch}/SwiftSupport" ]; then
+              cp -R "dist/${arch}/SwiftSupport" "${staging}/SwiftSupport"
+            fi
+            cat > "${staging}/INSTALL.txt" <<'EOF'
+          GoogleInputTools — Installation
+
+          1. Copy GoogleInputTools.app into ~/Library/Input Methods/
+          2. Copy the SwiftSupport directory into ~/Library/Input Methods/
+          3. Log out and log back in.
+          4. Enable the input method in System Settings > Keyboard > Input Sources.
+          EOF
+            hdiutil create \
+              -volname "GoogleInputTools-${arch}" \
+              -srcfolder "${staging}" \
+              -ov \
+              -format UDZO \
+              "dist/GoogleInputTools-${arch}.dmg"
+          done
+
+      # Verify DMGs were created
+      - name: Verify DMGs
         run: |
-          if [ ! -f "dist/GoogleInputTools-x86_64.zip" ] || [ ! -f "dist/GoogleInputTools-arm64.zip" ]; then
-            echo "Error: ZIP archives not created successfully"
+          if [ ! -f "dist/GoogleInputTools-x86_64.dmg" ] || [ ! -f "dist/GoogleInputTools-arm64.dmg" ]; then
+            echo "Error: DMG images not created successfully"
             exit 1
           fi
+          ls -lh dist/*.dmg
 
       # Create GitHub release
       - name: Create Release
@@ -156,17 +177,16 @@ jobs:
           name: Release ${{ steps.tag.outputs.release_tag }}
           body: |
             GoogleInputTools Input Method for macOS
-            
+
             Installation:
             1. Download the appropriate version for your Mac:
-               - Intel Macs: GoogleInputTools-x86_64.zip
-               - Apple Silicon Macs: GoogleInputTools-arm64.zip
-            2. Unzip the file
-            3. Copy GoogleInputTools.app and SwiftSupport directory to ~/Library/Input Methods/
-            4. Log out and log back in
-            5. Enable the input method in System Settings > Keyboard > Input Sources
+               - Intel Macs: GoogleInputTools-x86_64.dmg
+               - Apple Silicon Macs: GoogleInputTools-arm64.dmg
+            2. Open the DMG and copy GoogleInputTools.app and the SwiftSupport directory to ~/Library/Input Methods/
+            3. Log out and log back in
+            4. Enable the input method in System Settings > Keyboard > Input Sources
           draft: false
           prerelease: false
           files: |
-            ./dist/GoogleInputTools-x86_64.zip
-            ./dist/GoogleInputTools-arm64.zip
+            ./dist/GoogleInputTools-x86_64.dmg
+            ./dist/GoogleInputTools-arm64.dmg
