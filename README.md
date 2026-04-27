@@ -7,26 +7,27 @@ A english-nepali transliteration *cloud* input method that uses [Google Input To
 
 ## Install
 
-### Option 1: Download from Releases (recommended)
+### Option 1: Installer package (recommended)
 
-1. Download the latest DMG for your Mac from the [Releases page](https://github.com/ParajuliBkrm/macos-nepali-input-tool/releases/latest):
-   - Apple Silicon (M1/M2/M3/M4): `GoogleInputTools-arm64.dmg`
-   - Intel: `GoogleInputTools-x86_64.dmg`
+1. Download the latest installer for your Mac from the [Releases page](https://github.com/ParajuliBkrm/macos-nepali-input-tool/releases/latest):
+   - Apple Silicon (M1/M2/M3/M4): `GoogleInputTools-arm64.pkg`
+   - Intel: `GoogleInputTools-x86_64.pkg`
 
-2. Open the DMG and copy both `GoogleInputTools.app` and the `SwiftSupport` directory into `~/Library/Input Methods/`.
+2. Double-click the `.pkg` and follow the prompts. The installer places the input method into `/Library/Input Methods/`.
 
-  ```
-  cp -R /Volumes/GoogleInputTools-*/GoogleInputTools.app ~/Library/Input\ Methods/
-  cp -R /Volumes/GoogleInputTools-*/SwiftSupport ~/Library/Input\ Methods/
-  ```
+3. Open `System Settings` → `Keyboard` → `Input Sources`, click `+`, choose `English` → `Google Input Tools`.
 
-3. Log out and log back in.
+> The build is unsigned. If macOS blocks the installer, right-click the `.pkg` → `Open`, or allow it from `System Settings` → `Privacy & Security`. If the input method does not show up in the list, log out and log back in.
 
-4. Open `System Settings` → `Keyboard` → `Input Sources`, click `+`, choose `English` → `Google Input Tools`.
+### Option 2: Homebrew
 
-> The build is unsigned, so the first launch may be blocked by Gatekeeper. Right-click the app → `Open`, or allow it from `System Settings` → `Privacy & Security`.
+```sh
+brew install --cask https://raw.githubusercontent.com/ParajuliBkrm/macos-nepali-input-tool/main/Casks/google-input-tools.rb
+```
 
-### Option 2: Build from source
+Then enable it from `System Settings` → `Keyboard` → `Input Sources` as above.
+
+### Option 3: Build from source
 
 1. Install Xcode 12.5.0+.
 
@@ -55,6 +56,17 @@ A english-nepali transliteration *cloud* input method that uses [Google Input To
 3. Open `System Settings` → `Keyboard` → `Input Sources`, click `+`, choose `English` → `Google Input Tools`.
 
 ## Uninstall
+
+If you installed via the `.pkg` or Homebrew cask:
+
+  ```
+  brew uninstall --cask google-input-tools  # Homebrew users only
+  sudo rm -rf "/Library/Input Methods/GoogleInputTools.app"
+  sudo rm -rf "/Library/Input Methods/SwiftSupport"
+  sudo pkgutil --forget com.lennylxx.inputmethod.GoogleInputTools
+  ```
+
+If you installed manually or built from source:
 
   ```
   rm -rf ~/Library/Input\ Methods/GoogleInputTools.app

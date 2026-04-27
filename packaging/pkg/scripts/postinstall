@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -e
+
+# Stop any running instance so the freshly installed bundle is picked up
+# the next time the input method server launches it.
+killall -9 GoogleInputTools 2>/dev/null || true
+
+# Nudge the preferences daemon so the new input source shows up in
+# System Settings without requiring a logout.
+killall -HUP cfprefsd 2>/dev/null || true
+
+exit 0

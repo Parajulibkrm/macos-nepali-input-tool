@@ -123,43 +123,37 @@ jobs:
       - name: Generate release tag
         id: tag
         run: |
-          echo "release_tag=release-$(date +'%Y.%m.%d-%H%M')" >> $GITHUB_OUTPUT
+          version="$(date +'%Y.%m.%d-%H%M')"
+          echo "release_tag=release-${version}" >> $GITHUB_OUTPUT
+          echo "version=${version}" >> $GITHUB_OUTPUT
 
-      # Build DMG images
-      - name: Build DMG images
+      # Build .pkg installers
+      - name: Build .pkg installers
         run: |
           set -euo pipefail
           for arch in x86_64 arm64; do
-            staging="dist/dmg-${arch}"
-            mkdir -p "${staging}"
-            cp -R "dist/${arch}/"*.app "${staging}/"
-            if [ -d "dist/${arch}/SwiftSupport" ]; then
-              cp -R "dist/${arch}/SwiftSupport" "${staging}/SwiftSupport"
-            fi
-            cat > "${staging}/INSTALL.txt" <<'EOF'
-          GoogleInputTools — Installation
-
-          1. Copy GoogleInputTools.app into ~/Library/Input Methods/
-          2. Copy the SwiftSupport directory into ~/Library/Input Methods/
-          3. Log out and log back in.
-          4. Enable the input method in System Settings > Keyboard > Input Sources.
-          EOF
-            hdiutil create \
-              -volname "GoogleInputTools-${arch}" \
-              -srcfolder "${staging}" \
-              -ov \
-              -format UDZO \
-              "dist/GoogleInputTools-${arch}.dmg"
+            ./packaging/pkg/build-pkg.sh \
+              "dist/${arch}/GoogleInputTools.app" \
+              "dist/${arch}/SwiftSupport" \
+              "${arch}" \
+              "${{ steps.tag.outputs.version }}" \
+              "dist/GoogleInputTools-${arch}.pkg"
           done
 
-      # Verify DMGs were created
-      - name: Verify DMGs
+      # Verify pkgs and compute checksums for the Homebrew cask
+      - name: Verify pkgs and compute checksums
+        id: checksums
         run: |
-          if [ ! -f "dist/GoogleInputTools-x86_64.dmg" ] || [ ! -f "dist/GoogleInputTools-arm64.dmg" ]; then
-            echo "Error: DMG images not created successfully"
+          set -euo pipefail
+          if [ ! -f "dist/GoogleInputTools-x86_64.pkg" ] || [ ! -f "dist/GoogleInputTools-arm64.pkg" ]; then
+            echo "Error: pkg installers not created successfully"
             exit 1
           fi
-          ls -lh dist/*.dmg
+          ls -lh dist/*.pkg
+          intel_sha="$(shasum -a 256 dist/GoogleInputTools-x86_64.pkg | awk '{print $1}')"
+          arm_sha="$(shasum -a 256 dist/GoogleInputTools-arm64.pkg | awk '{print $1}')"
+          echo "intel_sha=${intel_sha}" >> $GITHUB_OUTPUT
+          echo "arm_sha=${arm_sha}" >> $GITHUB_OUTPUT
 
       # Create GitHub release
       - name: Create Release
@@ -173,15 +167,26 @@ jobs:
           body: |
             GoogleInputTools Input Method for macOS
 
-            Installation:
-            1. Download the appropriate version for your Mac:
-               - Intel Macs: GoogleInputTools-x86_64.dmg
-               - Apple Silicon Macs: GoogleInputTools-arm64.dmg
-            2. Open the DMG and copy GoogleInputTools.app and the SwiftSupport directory to ~/Library/Input Methods/
-            3. Log out and log back in
-            4. Enable the input method in System Settings > Keyboard > Input Sources
+            **Install (recommended):** download the matching `.pkg`, double-click it, follow the prompts.
+
+            - Apple Silicon (M1/M2/M3/M4): `GoogleInputTools-arm64.pkg`
+            - Intel: `GoogleInputTools-x86_64.pkg`
+
+            After install, open **System Settings → Keyboard → Input Sources**, click **+**, and choose **English → Google Input Tools**.
+
+            > The build is unsigned. On first launch, right-click the `.pkg` → **Open**, or allow it from **System Settings → Privacy & Security**.
+
+            **Install via Homebrew:**
+
+            ```sh
+            brew install --cask https://raw.githubusercontent.com/${{ github.repository }}/main/Casks/google-input-tools.rb
+            ```
+
+            SHA-256 checksums:
+            - `GoogleInputTools-arm64.pkg`: `${{ steps.checksums.outputs.arm_sha }}`
+            - `GoogleInputTools-x86_64.pkg`: `${{ steps.checksums.outputs.intel_sha }}`
           draft: false
           prerelease: false
           files: |
-            ./dist/GoogleInputTools-x86_64.dmg
-            ./dist/GoogleInputTools-arm64.dmg
+            ./dist/GoogleInputTools-x86_64.pkg
+            ./dist/GoogleInputTools-arm64.pkg
