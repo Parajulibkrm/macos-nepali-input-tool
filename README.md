@@ -5,7 +5,28 @@
 A english-nepali transliteration *cloud* input method that uses [Google Input Tools](https://www.google.com/inputtools/) as engine for macOS.
 
 
-## How to use
+## Install
+
+### Option 1: Download from Releases (recommended)
+
+1. Download the latest DMG for your Mac from the [Releases page](https://github.com/ParajuliBkrm/macos-nepali-input-tool/releases/latest):
+   - Apple Silicon (M1/M2/M3/M4): `GoogleInputTools-arm64.dmg`
+   - Intel: `GoogleInputTools-x86_64.dmg`
+
+2. Open the DMG and copy both `GoogleInputTools.app` and the `SwiftSupport` directory into `~/Library/Input Methods/`.
+
+  ```
+  cp -R /Volumes/GoogleInputTools-*/GoogleInputTools.app ~/Library/Input\ Methods/
+  cp -R /Volumes/GoogleInputTools-*/SwiftSupport ~/Library/Input\ Methods/
+  ```
+
+3. Log out and log back in.
+
+4. Open `System Settings` → `Keyboard` → `Input Sources`, click `+`, choose `English` → `Google Input Tools`.
+
+> The build is unsigned, so the first launch may be blocked by Gatekeeper. Right-click the app → `Open`, or allow it from `System Settings` → `Privacy & Security`.
+
+### Option 2: Build from source
 
 1. Install Xcode 12.5.0+.
 
@@ -15,28 +36,29 @@ A english-nepali transliteration *cloud* input method that uses [Google Input To
   git clone https://github.com/ParajuliBkrm/macos-nepali-input-tool.git
   cd macos-nepali-input-tool
   ./build.sh
-  ``` 
+  ```
 
-if you get this error
-  
+  If you get this error:
+
   ```
    xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory '/Library/Developer/CommandLineTools' is a command line tools instance
   ```
-  
-  then run this command
-  
+
+  then run:
+
   ```
   sudo xcode-select -r
   ```
 
-> The output will be `Users/[username]/Library/Input\ Methods/GoogleInputTools.app`
+> The output will be `~/Library/Input Methods/GoogleInputTools.app`.
 
-3. Open `System Preferences` -> `Keyboard` -> `Input Sources`, click `+` to add a new input method, choose `English` -> `Google Input Tools`.
+3. Open `System Settings` → `Keyboard` → `Input Sources`, click `+`, choose `English` → `Google Input Tools`.
 
-4. If you want to remove it, simply run below command.
+## Uninstall
 
   ```
   rm -rf ~/Library/Input\ Methods/GoogleInputTools.app
+  rm -rf ~/Library/Input\ Methods/SwiftSupport
   rm -rf ~/Library/Input\ Methods/GoogleInputTools.swiftmodule
   ```
 
@@ -55,14 +77,14 @@ if you get this error
   - [x] `Esc` key to cancel composing
   - [x] Bypass modifier keys (`Shift`, `Option`, `Command`, `Control`)
   - [x] `-` and `=` keys to page up and page down candidate list respectively
-  - [ ] Handle Purnabiram `|` and Devnagari Numbers `०`-`९`
+  - [x] Handle Purnabiram (`/` key inserts `।`) and Devnagari Numbers `०`-`९`
 - [x] System UI
 - [x] Basic custom UI
   - [x] Numbered candidates
   - [x] Highlight current selected candidate
-  - [ ] Arrow keys to switch between highlighted candidate
-  - [ ] Group candidates into multiple pages, each page with at most `10` candidates
-  - [ ] Page up and page down button
-  - [ ] Draggable candidate window
+  - [x] Arrow keys to switch between highlighted candidate
+  - [x] Group candidates into multiple pages, each page with at most `10` candidates
+  - [x] Page up and page down button
+  - [x] Draggable candidate window
 - [x] Cloud engine
-  - [ ] Cancel previous unnecessary web requests to speed up (Not tested Properly)
+  - [x] Cancel previous unnecessary web requests to speed up
