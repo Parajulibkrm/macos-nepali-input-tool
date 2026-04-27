@@ -4,6 +4,7 @@ import InputMethodKit
 class GoogleInputToolsController: IMKInputController {
 
     private let candidates: IMKCandidates
+    private var isActive: Bool = false
 
     override init!(server: IMKServer, delegate: Any, client inputClient: Any) {
         NSLog("\(#function)(\(inputClient))")
@@ -27,6 +28,7 @@ class GoogleInputToolsController: IMKInputController {
 
         NSLog("\(#function)(\(client))")
 
+        isActive = true
         client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
     }
 
@@ -37,19 +39,25 @@ class GoogleInputToolsController: IMKInputController {
 
         NSLog("\(#function)(\(client))")
 
+        isActive = false
         InputContext.shared.clean()
-        self.candidates.update()
-        self.candidates.hide()
+        if !UISettings.SystemUI {
+            CandidatesWindow.shared.hide()
+        }
     }
 
     func getAndRenderCandidates(_ compString: String) {
 
-        DispatchQueue.global().async {
+        DispatchQueue.global().async { [weak self] in
 
             let (candidates, matchedLength) = CloudInputEngine.shared.requestCandidatesSync(
                 compString)
 
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self, self.isActive,
+                      compString == InputContext.shared.composeString else {
+                    return
+                }
                 NSLog("main thread candidates: \(candidates)")
 
                 InputContext.shared.candidates = candidates
