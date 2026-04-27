@@ -21,8 +21,17 @@ A english-nepali transliteration *cloud* input method that uses [Google Input To
 
 ### Option 2: Homebrew
 
+This repository doubles as a Homebrew tap. First-time install:
+
 ```sh
-brew install --cask https://raw.githubusercontent.com/ParajuliBkrm/macos-nepali-input-tool/main/Casks/google-input-tools.rb
+brew tap parajulibkrm/macos-nepali-input-tool https://github.com/ParajuliBkrm/macos-nepali-input-tool
+brew install --cask parajulibkrm/macos-nepali-input-tool/google-input-tools
+```
+
+To upgrade later:
+
+```sh
+brew upgrade --cask parajulibkrm/macos-nepali-input-tool/google-input-tools
 ```
 
 Then enable it from `System Settings` → `Keyboard` → `Input Sources` as above.

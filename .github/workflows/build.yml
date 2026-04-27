@@ -176,10 +176,11 @@ jobs:
 
             > The build is unsigned. On first launch, right-click the `.pkg` → **Open**, or allow it from **System Settings → Privacy & Security**.
 
-            **Install via Homebrew:**
+            **Install via Homebrew (this repo doubles as a tap):**
 
             ```sh
-            brew install --cask https://raw.githubusercontent.com/${{ github.repository }}/main/Casks/google-input-tools.rb
+            brew tap parajulibkrm/macos-nepali-input-tool https://github.com/${{ github.repository }}
+            brew install --cask parajulibkrm/macos-nepali-input-tool/google-input-tools
             ```
 
             SHA-256 checksums:
