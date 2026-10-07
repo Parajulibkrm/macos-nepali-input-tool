@@ -1,79 +1,111 @@
 # Nepali Input for macOS
 
-A macOS input method for Nepali with two features:
+[![Release](https://github.com/Parajulibkrm/macos-nepali-input-tool/actions/workflows/build.yml/badge.svg)](https://github.com/Parajulibkrm/macos-nepali-input-tool/actions/workflows/build.yml)
 
-1. **Typing**: type romanized words ("namaste") and pick Devanagari suggestions, powered by [Google Input Tools](https://www.google.com/inputtools/).
-2. **Dictation**: hold **Right Option**, speak, release, and the text is typed at the cursor. It uses Google's speech engine (the one behind Chrome's voice input), free. The default language is Nepali; English and Hindi are in the menu.
+Type Nepali by typing English, or just say it. One keyboard, two ways to write:
 
-> "Nepali Input" is a placeholder name. Both features use unofficial Google endpoints that can change or rate-limit at any time.
+- **Type** romanized words (`namaste`) and pick the Devanagari suggestion (`नमस्ते`).
+- **Dictate**: hold **Right Option**, speak, release, and the text appears at your cursor. Works in any app.
+
+Both run on Google's free services, so there is nothing to sign up for and nothing to pay.
+
+<img width="555" alt="Typing demo" src="https://github.com/Parajulibkrm/macos-nepali-input-tool/blob/main/screenshots/demo.gif?raw=true">
 
 ## Install
 
-### Option 1: Installer package (recommended)
+Requires macOS 13 or later (Apple Silicon and Intel).
 
-1. Download `NepaliInput.pkg` from the [Releases page](https://github.com/ParajuliBkrm/macos-nepali-input-tool/releases/latest). It is universal (Apple Silicon and Intel).
-2. Double-click it and follow the prompts. It installs into `/Library/Input Methods/`.
-3. Open `System Settings` → `Keyboard` → `Input Sources`, click `+`, choose `Nepali` → `Nepali Input`.
+### Installer (recommended)
 
-If the input method does not show up, log out and log back in.
+1. Download `NepaliInput.pkg` from the [latest release](https://github.com/Parajulibkrm/macos-nepali-input-tool/releases/latest). It is signed and notarized.
+2. Double-click it and follow the prompts.
+3. Open **System Settings → Keyboard → Input Sources → Edit… → +**, choose **Nepali → Nepali Input**, and click **Add**.
+4. Pick **Nepali Input** from the input menu in the menu bar. The setup guide opens the first time and checks off each step as you finish it.
 
-### Option 2: Homebrew
+If the keyboard isn't listed, log out and back in.
+
+### Homebrew
 
 ```sh
-brew tap parajulibkrm/macos-nepali-input-tool https://github.com/ParajuliBkrm/macos-nepali-input-tool
+brew tap parajulibkrm/macos-nepali-input-tool https://github.com/Parajulibkrm/macos-nepali-input-tool
 brew install --cask parajulibkrm/macos-nepali-input-tool/nepali-input
 ```
 
-Upgrade with `brew upgrade --cask parajulibkrm/macos-nepali-input-tool/nepali-input`, then add the keyboard as above.
+### From source
 
-### Option 3: Build from source
-
-Needs Xcode command line tools and an Apple Development certificate (a stable signature keeps the Microphone and Accessibility permissions across rebuilds).
+Needs the Xcode command line tools and a code-signing identity (a stable signature lets macOS remember the permissions you grant).
 
 ```sh
-git clone https://github.com/ParajuliBkrm/macos-nepali-input-tool.git
+git clone https://github.com/Parajulibkrm/macos-nepali-input-tool.git
 cd macos-nepali-input-tool
-scripts/dev-install.sh   # installs into ~/Library/Input Methods
+scripts/dev-install.sh   # builds, signs and installs into ~/Library/Input Methods
 ```
 
-Maintainers: `scripts/release.sh` builds the universal, signed and notarized pkg into `dist/` (see the header of the script for the environment it reads).
+## Using it
 
-## Dictation
+### Typing
 
-Hold **Right Option**, speak, release. Press any other key while holding to cancel. The first use asks for the microphone. If another keyboard is active, the text is pasted instead, which needs Accessibility permission.
+| Key | Action |
+|---|---|
+| letters | build a word; suggestions appear |
+| `1`–`9` | choose a suggestion |
+| `Space` | commit the highlighted suggestion and add a space |
+| `Return` | commit the highlighted suggestion |
+| `←` `→` | move between suggestions |
+| `-` `=` | previous / next page of suggestions |
+| `Backspace` | remove the last letter |
+| `Esc` | cancel the word |
+| `/` | `।` (purna biram) |
+
+Shortcuts such as ⌘A or ⌃-keys work as usual and end the word you were typing.
+
+### Dictation
+
+Hold **Right Option**, speak, release. Press any other key while holding to cancel, so Option shortcuts keep working. Taps shorter than a third of a second are ignored.
+
+- **Language:** Nepali (default), English or Hindi.
+- **Mode:** *At Once* (default) sends your speech to Google in pieces while you talk and gives the most reliable text after you let go. *Streaming* shows words as you speak but Google sometimes drops some.
+- With Nepali Input as your active keyboard, text is typed straight in. With another keyboard active, it is pasted, which needs Accessibility permission.
+
+Change these in the menu-bar mic icon, the input menu, or the **Settings** window.
+
+### Permissions
+
+| Permission | Needed for |
+|---|---|
+| Microphone | dictation (asked the first time) |
+| Accessibility | optional: use Right Option and dictate while another keyboard is active |
+
+## Privacy
+
+- **Typing:** each word you are composing is sent to `inputtools.google.com` to get suggestions.
+- **Dictation:** your voice is recorded only while you hold Right Option and is sent to Google's speech service for transcription.
+- Nothing else leaves your Mac, and the app does not log what you type or say.
+
+Both features use unofficial Google endpoints (the same ones Google Input Tools and Chrome's voice input use). They are free but can change or be rate-limited at any time.
+
+## Troubleshooting
+
+- **Not in the keyboard list / does nothing:** log out and back in. The app lives in `/Library/Input Methods/` (installer) or `~/Library/Input Methods/` (source install). Make sure the file `Nepali Input.app/Contents/MacOS/NepaliInput` is executable.
+- **Dictation doesn't start with another keyboard:** grant Accessibility in System Settings → Privacy & Security.
+- **"Microphone is off":** System Settings → Privacy & Security → Microphone.
+- **Reopen the guide:** menu-bar mic icon → **Setup Guide…**
 
 ## Uninstall
 
 ```sh
-brew uninstall --cask nepali-input                       # Homebrew users only
-sudo rm -rf "/Library/Input Methods/Nepali Input.app"    # pkg installs
+brew uninstall --cask nepali-input                       # Homebrew installs
+sudo rm -rf "/Library/Input Methods/Nepali Input.app"    # installer
 sudo pkgutil --forget io.veez.inputmethod.NepaliInput
-rm -rf ~/Library/Input\ Methods/Nepali\ Input.app        # dev-install
+rm -rf ~/Library/Input\ Methods/Nepali\ Input.app        # source install
 ```
 
-## Screenshot
+Then remove the keyboard under System Settings → Keyboard → Input Sources.
 
-<img width="555" alt="screenshot" src="https://github.com/Parajulibkrm/macos-nepali-input-tool/blob/main/screenshots/demo.gif?raw=true">
+## Development
 
-## Progress
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the layout, how to test and how releases are built.
 
-- [x] Basic input handling logic
-  - [x] `Space` key to commit current highlighted candidate and add a space.
-  - [x] `Return` key to commit current highlighted candidate.
-  - [x] Number keys (`1`-`9`) to select candidate and commit
-  - [x] Continue to show new candidates after partial matched candidate is selected and committed
-  - [x] `Backspace` key to remove last composing letter
-  - [x] `Esc` key to cancel composing
-  - [x] Bypass modifier keys (`Shift`, `Option`, `Command`, `Control`)
-  - [x] `-` and `=` keys to page up and page down candidate list respectively
-  - [x] Handle Purnabiram (`/` key inserts `।`) and Devnagari Numbers `०`-`९`
-- [x] System UI
-- [x] Basic custom UI
-  - [x] Numbered candidates
-  - [x] Highlight current selected candidate
-  - [x] Arrow keys to switch between highlighted candidate
-  - [x] Group candidates into multiple pages, each page with at most `10` candidates
-  - [x] Page up and page down button
-  - [x] Draggable candidate window
-- [x] Cloud engine
-  - [x] Cancel previous unnecessary web requests to speed up
+## Credits and license
+
+Started from [lennylxx/GoogleInputTools](https://github.com/lennylxx/GoogleInputTools). Licensed under [GPL-3.0](LICENSE).

@@ -16,7 +16,7 @@ jobs:
 
       # Secrets (set in the repo settings):
       #   APP_CERT_P12 / INSTALLER_CERT_P12  base64 of the exported .p12 files
-      #   CERT_PASSWORD                      their password
+      #   APP_CERT_PASSWORD, INSTALLER_CERT_PASSWORD  their passwords
       #   NOTARY_APPLE_ID, NOTARY_PASSWORD   Apple ID + app-specific password
       #   NOTARY_TEAM_ID                     T2SGYX37P4
       - name: Import signing certificates
@@ -27,17 +27,18 @@ jobs:
           security set-keychain-settings -lut 21600 "$KC"
           security unlock-keychain -p ci "$KC"
           security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
-          for var in APP_CERT_P12 INSTALLER_CERT_P12; do
-            echo "${!var}" | base64 --decode > "$RUNNER_TEMP/$var.p12"
-            security import "$RUNNER_TEMP/$var.p12" -k "$KC" -P "$CERT_PASSWORD" -T /usr/bin/codesign -T /usr/bin/productbuild
-          done
+          echo "$APP_CERT_P12" | base64 --decode > "$RUNNER_TEMP/app.p12"
+          security import "$RUNNER_TEMP/app.p12" -k "$KC" -P "$APP_CERT_PASSWORD" -T /usr/bin/codesign
+          echo "$INSTALLER_CERT_P12" | base64 --decode > "$RUNNER_TEMP/installer.p12"
+          security import "$RUNNER_TEMP/installer.p12" -k "$KC" -P "$INSTALLER_CERT_PASSWORD" -T /usr/bin/productbuild
           security set-key-partition-list -S apple-tool:,apple: -s -k ci "$KC"
           xcrun notarytool store-credentials "$NOTARY_PROFILE" \
             --apple-id "$NOTARY_APPLE_ID" --password "$NOTARY_PASSWORD" --team-id "$NOTARY_TEAM_ID"
         env:
           APP_CERT_P12: ${{ secrets.APP_CERT_P12 }}
           INSTALLER_CERT_P12: ${{ secrets.INSTALLER_CERT_P12 }}
-          CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
+          APP_CERT_PASSWORD: ${{ secrets.APP_CERT_PASSWORD }}
+          INSTALLER_CERT_PASSWORD: ${{ secrets.INSTALLER_CERT_PASSWORD }}
           NOTARY_APPLE_ID: ${{ secrets.NOTARY_APPLE_ID }}
           NOTARY_PASSWORD: ${{ secrets.NOTARY_PASSWORD }}
           NOTARY_TEAM_ID: ${{ secrets.NOTARY_TEAM_ID }}

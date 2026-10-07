@@ -2,3 +2,5 @@
 .build/
 build/
 dist/
+
+CLAUDE.local.md
