@@ -186,7 +186,7 @@ final class SetupWindowController: NSObject, NSWindowDelegate {
             let name = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "Nepali Input"
             let host = NSHostingController(rootView: MainView(setup: model, settings: SettingsModel(), appName: name) { [weak self] in self?.finish() })
             let w = NSWindow(contentViewController: host)
-            w.title = "\(name) Setup"
+            w.title = name
             w.styleMask = [.titled, .closable, .fullSizeContentView]
             w.titlebarAppearsTransparent = true
             w.isReleasedWhenClosed = false

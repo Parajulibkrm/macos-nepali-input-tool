@@ -9,7 +9,19 @@ Type Nepali by typing English, or just say it. One keyboard, two ways to write:
 
 Both run on Google's free services, so there is nothing to sign up for and nothing to pay.
 
+## Screenshots
+
+**Typing**
+
 <img width="555" alt="Typing demo" src="https://github.com/Parajulibkrm/macos-nepali-input-tool/blob/main/screenshots/demo.gif?raw=true">
+
+**Dictation**: a small card appears while you speak, with live level bars (and live words in Streaming mode).
+
+<img width="480" alt="Dictation overlay" src="screenshots/dictation-overlay.png">
+
+**Setup guide and settings**
+
+<img width="360" alt="Setup guide" src="screenshots/setup.png"> <img width="360" alt="Settings" src="screenshots/settings.png">
 
 ## Install
 
