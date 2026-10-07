@@ -84,7 +84,7 @@ struct SetupView: View {
         VStack(alignment: .leading, spacing: 18) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Set up \(appName)").font(.largeTitle.bold())
-                Text("Type Nepali with a romanized keyboard, or hold Right Option and speak.")
+                Text("Type Nepali with a romanized keyboard, or hold \(DictationController.shared.hotkeyKey.title) and speak.")
                     .foregroundStyle(.secondary)
             }
 
@@ -104,7 +104,7 @@ struct SetupView: View {
                     }
                 }
                 StepCard(number: 4, title: "Dictate in every keyboard (optional)", done: model.accessibility, optional: true) {
-                    Text("Accessibility lets Right Option work and paste text even when another keyboard is active.")
+                    Text("Accessibility lets the dictation key work and paste text even when another keyboard is active.")
                     Button("Grant Accessibility") {
                         DictationController.shared.requestAccessibility()
                         SetupModel.openSettings("Privacy_Accessibility")
@@ -114,10 +114,10 @@ struct SetupView: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("Try it").font(.headline)
-                TextField("Type “namaste” and press space, or hold Right Option and speak", text: $tryText)
+                TextField("Type “namaste” and press space, or hold the dictation key and speak", text: $tryText)
                     .textFieldStyle(.roundedBorder)
                     .controlSize(.large)
-                Text("Typing: 1–9 picks a suggestion, space commits. Dictation: hold Right Option, speak, release. Any other key cancels.")
+                Text("Typing: 1–9 picks a suggestion, space commits. Dictation: hold \(DictationController.shared.hotkeyKey.title), speak, release. Any other key cancels.")
                     .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
 

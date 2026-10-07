@@ -2,7 +2,7 @@ import AppKit
 import AVFoundation
 import ServiceManagement
 
-/// Hold Right Option, speak, release: the words are typed where the cursor is.
+/// Hold the dictation key (Right Option by default), speak, release: the words are typed where the cursor is.
 /// While this input method is the active keyboard the text goes straight into the app;
 /// otherwise it's pasted (which, like the global hotkey, needs Accessibility).
 final class DictationController: NSObject, NSMenuDelegate {
@@ -32,12 +32,24 @@ final class DictationController: NSObject, NSMenuDelegate {
         set { defaults.set(newValue.rawValue, forKey: "dictationMode") }
     }
 
+    var hotkeyKey: HotkeyKey {
+        get { HotkeyKey.all.first { $0.id == defaults.string(forKey: "hotkeyKey") } ?? .default }
+        set { defaults.set(newValue.id, forKey: "hotkeyKey"); hotkey.key = newValue }
+    }
+
+    var togglesHotkey: Bool {
+        get { defaults.bool(forKey: "hotkeyToggle") }
+        set { defaults.set(newValue, forKey: "hotkeyToggle"); hotkey.toggles = newValue }
+    }
+
     var showsMenuBarIcon: Bool {
         get { defaults.object(forKey: "showMenuBarIcon") as? Bool ?? true }
         set { defaults.set(newValue, forKey: "showMenuBarIcon"); refreshStatusItem() }
     }
 
     func start() {
+        hotkey.key = hotkeyKey
+        hotkey.toggles = togglesHotkey
         hotkey.onPress = { [weak self] in self?.begin() }
         hotkey.onRelease = { [weak self] in self?.finish() }
         hotkey.onCancel = { [weak self] in self?.cancel() }
@@ -62,7 +74,7 @@ final class DictationController: NSObject, NSMenuDelegate {
     }
 
     private var idleStatus: String {
-        AXIsProcessTrusted() ? "Hold Right Option to dictate" : "Dictation works in this keyboard only (Accessibility off)"
+        AXIsProcessTrusted() ? (togglesHotkey ? "Press \(hotkeyKey.title) to start and stop dictating" : "Hold \(hotkeyKey.title) to dictate") : "Dictation works in this keyboard only (Accessibility off)"
     }
 
     func requestAccessibility() {
@@ -80,9 +92,11 @@ final class DictationController: NSObject, NSMenuDelegate {
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .audio) { _ in }
             setStatus("Allow microphone access, then try again")
+            hotkey.reset()
             return
         default:
             fail("Microphone is off: System Settings → Privacy & Security → Microphone")
+            hotkey.reset()
             return
         }
 
@@ -96,6 +110,7 @@ final class DictationController: NSObject, NSMenuDelegate {
         } catch {
             live.cancel()
             fail(error.localizedDescription)
+            hotkey.reset()
             return
         }
         recorder = rec
@@ -236,6 +251,15 @@ final class DictationController: NSObject, NSMenuDelegate {
         langItem.submenu = langMenu
         menu.addItem(langItem)
 
+        let keyMenu = NSMenu()
+        for k in HotkeyKey.all { keyMenu.addItem(item(k.title, "key:\(k.id)", on: k == hotkeyKey)) }
+        keyMenu.addItem(.separator())
+        keyMenu.addItem(item("Hold to Talk", "behavior:hold", on: !togglesHotkey))
+        keyMenu.addItem(item("Press to Start / Stop", "behavior:toggle", on: togglesHotkey))
+        let keyItem = NSMenuItem(title: "Dictation Key", action: nil, keyEquivalent: "")
+        keyItem.submenu = keyMenu
+        menu.addItem(keyItem)
+
         let modeMenu = NSMenu()
         for m in Mode.allCases { modeMenu.addItem(item(m.title, "mode:\(m.rawValue)", on: m == mode)) }
         let modeItem = NSMenuItem(title: "Dictation Mode", action: nil, keyEquivalent: "")
@@ -266,6 +290,10 @@ final class DictationController: NSObject, NSMenuDelegate {
         let tag = sender.representedObject as? String ?? ""
         if tag.hasPrefix("lang:") {
             lang = String(tag.dropFirst(5))
+        } else if tag.hasPrefix("key:"), let k = HotkeyKey.all.first(where: { $0.id == String(tag.dropFirst(4)) }) {
+            hotkeyKey = k
+        } else if tag.hasPrefix("behavior:") {
+            togglesHotkey = tag == "behavior:toggle"
         } else if tag.hasPrefix("mode:"), let m = Mode(rawValue: String(tag.dropFirst(5))) {
             mode = m
         } else if tag == "menubar" {

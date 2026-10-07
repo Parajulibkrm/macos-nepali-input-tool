@@ -33,6 +33,6 @@
         <string>ne-NP</string>
     </array>
     <key>NSMicrophoneUsageDescription</key>
-    <string>While you hold Right Option, your voice is recorded and sent to Google for transcription.</string>
+    <string>While you dictate, your voice is recorded and sent to Google for transcription.</string>
 </dict>
 </plist>

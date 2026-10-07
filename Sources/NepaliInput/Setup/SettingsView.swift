@@ -11,6 +11,8 @@ final class SettingsModel: ObservableObject {
 
     @Published var lang: String { didSet { dictation.lang = lang } }
     @Published var mode: Mode { didSet { dictation.mode = mode } }
+    @Published var hotkey: HotkeyKey { didSet { dictation.hotkeyKey = hotkey } }
+    @Published var toggles: Bool { didSet { dictation.togglesHotkey = toggles } }
     @Published var showsMenuBarIcon: Bool { didSet { dictation.showsMenuBarIcon = showsMenuBarIcon } }
     @Published var startsAtLogin: Bool
     @Published var loginError: String?
@@ -18,6 +20,8 @@ final class SettingsModel: ObservableObject {
     init() {
         lang = dictation.lang
         mode = dictation.mode
+        hotkey = dictation.hotkeyKey
+        toggles = dictation.togglesHotkey
         showsMenuBarIcon = dictation.showsMenuBarIcon
         startsAtLogin = dictation.startsAtLogin
         NotificationCenter.default.addObserver(forName: .dictationSettingsChanged, object: nil, queue: .main) { [weak self] _ in
@@ -28,6 +32,8 @@ final class SettingsModel: ObservableObject {
     private func reload() {
         lang = dictation.lang
         mode = dictation.mode
+        hotkey = dictation.hotkeyKey
+        toggles = dictation.togglesHotkey
         showsMenuBarIcon = dictation.showsMenuBarIcon
         startsAtLogin = dictation.startsAtLogin
     }
@@ -46,11 +52,26 @@ struct SettingsView: View {
             Text("Settings").font(.largeTitle.bold())
 
             Section("Dictation") {
-                Row("Language", note: "What you speak. Hold Right Option to dictate.") {
+                Row("Language", note: "What you speak.") {
                     Picker("", selection: $model.lang) {
                         ForEach(DictationController.languages, id: \.0) { Text($0.1).tag($0.0) }
                     }
                     .labelsHidden().frame(width: 170)
+                }
+                Row("Dictation key") {
+                    Picker("", selection: $model.hotkey) {
+                        ForEach(HotkeyKey.all) { Text($0.title).tag($0) }
+                    }
+                    .labelsHidden().frame(width: 170)
+                }
+                Row("Behavior", note: model.toggles
+                    ? "Press the key to start, press it again to type. Esc cancels."
+                    : "Hold the key while you speak, release to type. Any other key cancels.") {
+                    Picker("", selection: $model.toggles) {
+                        Text("Hold").tag(false)
+                        Text("Toggle").tag(true)
+                    }
+                    .pickerStyle(.segmented).labelsHidden().frame(width: 170)
                 }
                 Row("Mode", note: model.mode == .atOnce
                     ? "Sends pauses to Google while you talk. Text appears after you release."

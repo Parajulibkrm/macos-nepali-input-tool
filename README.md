@@ -63,6 +63,9 @@ Shortcuts such as ⌘A or ⌃-keys work as usual and end the word you were typin
 
 Hold **Right Option**, speak, release. Press any other key while holding to cancel, so Option shortcuts keep working. Taps shorter than a third of a second are ignored.
 
+- **Key:** Right Option (default), Left Option, Right Command or Right Control.
+- **Behavior:** *Hold* (talk while you hold the key) or *Toggle* (press to start, press again to type; Esc cancels).
+
 - **Language:** Nepali (default), English or Hindi.
 - **Mode:** *At Once* (default) sends your speech to Google in pieces while you talk and gives the most reliable text after you let go. *Streaming* shows words as you speak but Google sometimes drops some.
 - With Nepali Input as your active keyboard, text is typed straight in. With another keyboard active, it is pasted, which needs Accessibility permission.
@@ -79,7 +82,7 @@ Change these in the menu-bar mic icon, the input menu, or the **Settings** windo
 ## Privacy
 
 - **Typing:** each word you are composing is sent to `inputtools.google.com` to get suggestions.
-- **Dictation:** your voice is recorded only while you hold Right Option and is sent to Google's speech service for transcription.
+- **Dictation:** your voice is recorded only while you dictate and is sent to Google's speech service for transcription.
 - Nothing else leaves your Mac, and the app does not log what you type or say.
 
 Both features use unofficial Google endpoints (the same ones Google Input Tools and Chrome's voice input use). They are free but can change or be rate-limited at any time.
