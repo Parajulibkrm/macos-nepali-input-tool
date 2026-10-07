@@ -33,8 +33,8 @@ final class DictationController: NSObject, NSMenuDelegate {
     }
 
     var hotkeyKey: HotkeyKey {
-        get { HotkeyKey.all.first { $0.id == defaults.string(forKey: "hotkeyKey") } ?? .default }
-        set { defaults.set(newValue.id, forKey: "hotkeyKey"); hotkey.key = newValue }
+        get { (defaults.object(forKey: "hotkeyKeyCode") as? Int).flatMap { HotkeyKey.forKeyCode(UInt16($0)) } ?? .default }
+        set { defaults.set(Int(newValue.keyCode), forKey: "hotkeyKeyCode"); hotkey.key = newValue }
     }
 
     var togglesHotkey: Bool {
@@ -252,7 +252,7 @@ final class DictationController: NSObject, NSMenuDelegate {
         menu.addItem(langItem)
 
         let keyMenu = NSMenu()
-        for k in HotkeyKey.all { keyMenu.addItem(item(k.title, "key:\(k.id)", on: k == hotkeyKey)) }
+        keyMenu.addItem(item("Key: \(hotkeyKey.title) — Change…", "settings"))
         keyMenu.addItem(.separator())
         keyMenu.addItem(item("Hold to Talk", "behavior:hold", on: !togglesHotkey))
         keyMenu.addItem(item("Press to Start / Stop", "behavior:toggle", on: togglesHotkey))
@@ -290,8 +290,6 @@ final class DictationController: NSObject, NSMenuDelegate {
         let tag = sender.representedObject as? String ?? ""
         if tag.hasPrefix("lang:") {
             lang = String(tag.dropFirst(5))
-        } else if tag.hasPrefix("key:"), let k = HotkeyKey.all.first(where: { $0.id == String(tag.dropFirst(4)) }) {
-            hotkeyKey = k
         } else if tag.hasPrefix("behavior:") {
             togglesHotkey = tag == "behavior:toggle"
         } else if tag.hasPrefix("mode:"), let m = Mode(rawValue: String(tag.dropFirst(5))) {

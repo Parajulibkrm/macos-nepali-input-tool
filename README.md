@@ -63,7 +63,7 @@ Shortcuts such as ⌘A or ⌃-keys work as usual and end the word you were typin
 
 Hold **Right Option**, speak, release. Press any other key while holding to cancel, so Option shortcuts keep working. Taps shorter than a third of a second are ignored.
 
-- **Key:** Right Option (default), Left Option, Right Command or Right Control.
+- **Key:** Right Option by default. In Settings, click the key and press the one you want: any modifier (Option, Command, Control, Shift, Fn, either side) or an F-key. Key combinations aren't supported.
 - **Behavior:** *Hold* (talk while you hold the key) or *Toggle* (press to start, press again to type; Esc cancels).
 
 - **Language:** Nepali (default), English or Hindi.

@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 enum SettingsTab: String, CaseIterable, Identifiable {
@@ -58,11 +59,8 @@ struct SettingsView: View {
                     }
                     .labelsHidden().frame(width: 170)
                 }
-                Row("Dictation key") {
-                    Picker("", selection: $model.hotkey) {
-                        ForEach(HotkeyKey.all) { Text($0.title).tag($0) }
-                    }
-                    .labelsHidden().frame(width: 170)
+                Row("Dictation key", note: "A modifier key (Option, Command, Control, Shift, Fn) or an F-key.") {
+                    HotkeyRecorder(key: $model.hotkey)
                 }
                 Row("Behavior", note: model.toggles
                     ? "Press the key to start, press it again to type. Esc cancels."
@@ -152,5 +150,52 @@ struct MainView: View {
             case .setup: SetupView(model: setup, appName: appName, onDone: onDone)
             }
         }
+    }
+}
+
+/// Click, then press the key to use. Modifier keys are taken on press, so a key like Right Option
+/// can be recorded without a combination. Esc cancels.
+private struct HotkeyRecorder: View {
+    @Binding var key: HotkeyKey
+    @State private var recording = false
+    @State private var hint: String?
+    @State private var monitor: Any?
+
+    var body: some View {
+        HStack(spacing: 8) {
+            if key != .default, !recording {
+                Button("Reset") { key = .default }.buttonStyle(.link)
+            }
+            Button(action: recording ? stop : start) {
+                Text(recording ? (hint ?? "Press a key…") : key.title)
+                    .frame(minWidth: 120)
+            }
+            .controlSize(.regular)
+            .tint(recording ? .accentColor : nil)
+        }
+        .onDisappear(perform: stop)
+    }
+
+    private func start() {
+        recording = true
+        hint = nil
+        monitor = NSEvent.addLocalMonitorForEvents(matching: [.flagsChanged, .keyDown]) { e in
+            if e.type == .keyDown && e.keyCode == 53 { stop(); return nil }
+            if let k = HotkeyKey.forKeyCode(e.keyCode) {
+                // A modifier counts when it goes down, not when it comes back up.
+                if e.type == .flagsChanged, e.modifierFlags.rawValue & k.mask == 0 { return nil }
+                key = k
+                stop()
+            } else if e.type == .keyDown {
+                hint = "Use a modifier or F-key"
+            }
+            return nil
+        }
+    }
+
+    private func stop() {
+        if let monitor { NSEvent.removeMonitor(monitor) }
+        monitor = nil
+        recording = false
     }
 }

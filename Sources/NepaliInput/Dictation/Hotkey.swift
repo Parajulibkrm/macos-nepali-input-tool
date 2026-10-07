@@ -1,29 +1,48 @@
 import AppKit
 
-/// A modifier key that can be held to talk. `mask` is its device-specific bit in the event flags
-/// (so left and right keys can be told apart); `otherMask` is the same bit of its twin.
+/// The key that starts dictation: a single modifier key (either side) or a function key.
+/// For modifiers, `mask` is the key's device-specific bit in the event flags (so left and right
+/// can be told apart) and `otherMask` the same bit of its twin; function keys have neither.
 struct HotkeyKey: Identifiable, Hashable {
-    let id: String
-    let title: String
     let keyCode: UInt16
+    let title: String
     let mask: UInt
     let otherMask: UInt
-    let flag: NSEvent.ModifierFlags
+    let flag: NSEvent.ModifierFlags?
 
-    static let all = [
-        HotkeyKey(id: "rightOption", title: "Right Option", keyCode: 61, mask: 0x40, otherMask: 0x20, flag: .option),
-        HotkeyKey(id: "leftOption", title: "Left Option", keyCode: 58, mask: 0x20, otherMask: 0x40, flag: .option),
-        HotkeyKey(id: "rightCommand", title: "Right Command", keyCode: 54, mask: 0x10, otherMask: 0x8, flag: .command),
-        HotkeyKey(id: "rightControl", title: "Right Control", keyCode: 62, mask: 0x2000, otherMask: 0x1, flag: .control),
+    var id: UInt16 { keyCode }
+    var isModifier: Bool { flag != nil }
+
+    private static let modifiers = [
+        HotkeyKey(keyCode: 61, title: "Right Option", mask: 0x40, otherMask: 0x20, flag: .option),
+        HotkeyKey(keyCode: 58, title: "Left Option", mask: 0x20, otherMask: 0x40, flag: .option),
+        HotkeyKey(keyCode: 54, title: "Right Command", mask: 0x10, otherMask: 0x8, flag: .command),
+        HotkeyKey(keyCode: 55, title: "Left Command", mask: 0x8, otherMask: 0x10, flag: .command),
+        HotkeyKey(keyCode: 62, title: "Right Control", mask: 0x2000, otherMask: 0x1, flag: .control),
+        HotkeyKey(keyCode: 59, title: "Left Control", mask: 0x1, otherMask: 0x2000, flag: .control),
+        HotkeyKey(keyCode: 60, title: "Right Shift", mask: 0x4, otherMask: 0x2, flag: .shift),
+        HotkeyKey(keyCode: 56, title: "Left Shift", mask: 0x2, otherMask: 0x4, flag: .shift),
+        HotkeyKey(keyCode: 63, title: "Fn", mask: 0x800000, otherMask: 0, flag: .function),
     ]
-    static let `default` = all[0]
 
-    static func == (a: HotkeyKey, b: HotkeyKey) -> Bool { a.id == b.id }
-    func hash(into hasher: inout Hasher) { hasher.combine(id) }
+    private static let functionKeys: [HotkeyKey] = [
+        (122, 1), (120, 2), (99, 3), (118, 4), (96, 5), (97, 6), (98, 7), (100, 8), (101, 9), (109, 10),
+        (103, 11), (111, 12), (105, 13), (107, 14), (113, 15), (106, 16), (64, 17), (79, 18), (80, 19), (90, 20),
+    ].map { HotkeyKey(keyCode: UInt16($0.0), title: "F\($0.1)", mask: 0, otherMask: 0, flag: nil) }
+
+    static let `default` = modifiers[0]
+
+    /// The key for a recorded key code, or nil when it can't be used (letters, arrows…).
+    static func forKeyCode(_ code: UInt16) -> HotkeyKey? {
+        (modifiers + functionKeys).first { $0.keyCode == code }
+    }
+
+    static func == (a: HotkeyKey, b: HotkeyKey) -> Bool { a.keyCode == b.keyCode }
+    func hash(into hasher: inout Hasher) { hasher.combine(keyCode) }
 }
 
-/// Hold-to-talk on a modifier key (Right Option by default). Pressing any other key while
-/// holding cancels, so shortcuts that use the same modifier keep working.
+/// Hold-to-talk on one key (Right Option by default). Pressing any other key while holding
+/// cancels, so shortcuts that use the same modifier keep working.
 ///
 /// Events arrive from two places: global monitors (any app, needs Accessibility) and the
 /// input method itself while it's the active keyboard (no permission needed). When both
@@ -56,10 +75,10 @@ final class Hotkey {
 
     func startGlobalMonitoring() {
         guard monitors.isEmpty else { return }
-        if let m = NSEvent.addGlobalMonitorForEvents(matching: [.flagsChanged, .keyDown], handler: { [weak self] in self?.feed($0) }) {
+        if let m = NSEvent.addGlobalMonitorForEvents(matching: [.flagsChanged, .keyDown, .keyUp], handler: { [weak self] in self?.feed($0) }) {
             monitors.append(m)
         }
-        if let m = NSEvent.addLocalMonitorForEvents(matching: [.flagsChanged, .keyDown], handler: { [weak self] in self?.feed($0); return $0 }) {
+        if let m = NSEvent.addLocalMonitorForEvents(matching: [.flagsChanged, .keyDown, .keyUp], handler: { [weak self] in self?.feed($0); return $0 }) {
             monitors.append(m)
         }
     }
@@ -69,15 +88,31 @@ final class Hotkey {
         guard e.timestamp != lastTimestamp else { return }
         lastTimestamp = e.timestamp
 
-        if e.type == .keyDown { otherKey(escape: e.keyCode == 53); return }
-        guard e.type == .flagsChanged else { return }
-        guard e.keyCode == key.keyCode else { otherKey(escape: false); return }
-        let raw = e.modifierFlags.rawValue
-        let down = raw & key.mask != 0
-        // The same press also arrives from the other source with the modifier flag but without
-        // this key's device bit; reading that copy as "released" cut every hold short. It only
-        // counts as a release when the twin key (e.g. Left Option) is what keeps the flag set.
-        if e.modifierFlags.contains(key.flag) && !down && raw & key.otherMask == 0 { return }
+        if key.isModifier {
+            if e.type == .keyDown { otherKey(escape: e.keyCode == 53); return }
+            guard e.type == .flagsChanged else { return }
+            guard e.keyCode == key.keyCode else { otherKey(escape: false); return }
+            let raw = e.modifierFlags.rawValue
+            // The same press also arrives from the other source with the modifier flag but without
+            // this key's device bit; reading that copy as "released" cut every hold short. It only
+            // counts as a release when the twin key (e.g. Left Option) is what keeps the flag set.
+            let down = raw & key.mask != 0
+            if let flag = key.flag, e.modifierFlags.contains(flag), !down, raw & key.otherMask == 0 { return }
+            changed(down: down)
+        } else {
+            switch e.type {
+            case .keyDown:
+                if e.keyCode == key.keyCode { if !e.isARepeat { changed(down: true) } }
+                else { otherKey(escape: e.keyCode == 53) }
+            case .keyUp:
+                if e.keyCode == key.keyCode { changed(down: false) }
+            default:
+                break
+            }
+        }
+    }
+
+    private func changed(down: Bool) {
         if toggles {
             guard down else { return }
             if held { held = false; onRelease() } else { held = true; onPress() }
