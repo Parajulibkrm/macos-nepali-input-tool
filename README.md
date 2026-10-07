@@ -19,10 +19,6 @@ Both run on Google's free services, so there is nothing to sign up for and nothi
 
 <img width="480" alt="Dictation overlay" src="screenshots/dictation-overlay.png">
 
-**Setup guide and settings**
-
-<img width="360" alt="Setup guide" src="screenshots/setup.png"> <img width="360" alt="Settings" src="screenshots/settings.png">
-
 ## Install
 
 Requires macOS 13 or later (Apple Silicon and Intel).
