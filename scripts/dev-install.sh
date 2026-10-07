@@ -5,7 +5,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 source scripts/config.sh
 
-IDENTITY="${IDENTITY:-$(security find-identity -v -p codesigning | grep -m1 'Apple Development' | sed -E 's/.*"(.*)"/\1/')}"
+# The first match can change when the keychain changes, and a different identity resets the
+# granted permissions, so set IDENTITY (or SIGNING_HINT) to pin one.
+IDENTITY="${IDENTITY:-$(security find-identity -v -p codesigning | grep -m1 "Apple Development.*${SIGNING_HINT:-}" | sed -E 's/.*"(.*)"/\1/')}"
 DEST="$HOME/Library/Input Methods"
 
 APP="$(scripts/make-bundle.sh .build/bundle | tail -1)"
