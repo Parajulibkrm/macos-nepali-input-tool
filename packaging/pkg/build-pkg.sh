@@ -1,75 +1,81 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Build a signed-or-unsigned macOS installer .pkg for GoogleInputTools.
-#
-# Usage: build-pkg.sh <app-path> <swiftsupport-dir> <arch> <version> <output-pkg>
-#   app-path         Path to GoogleInputTools.app
-#   swiftsupport-dir Directory containing *.swiftmodule (may be empty)
-#   arch             x86_64 | arm64
-#   version          Version string for the package (e.g. 2026.04.27)
-#   output-pkg       Destination .pkg path
-
-if [ "$#" -ne 5 ]; then
-  echo "Usage: $0 <app-path> <swiftsupport-dir> <arch> <version> <output-pkg>" >&2
+# Builds the installer .pkg (universal, one package for both architectures).
+# Usage: build-pkg.sh <app-path> <output-pkg> [installer-identity]
+#   installer-identity  "Developer ID Installer: …"; the pkg is left unsigned when omitted.
+if [ "$#" -lt 2 ]; then
+  echo "Usage: $0 <app-path> <output-pkg> [installer-identity]" >&2
   exit 1
 fi
 
 APP_PATH="$1"
-SWIFT_SUPPORT="$2"
-ARCH="$3"
-VERSION="$4"
-OUTPUT="$5"
+OUTPUT="$2"
+IDENTITY="${3:-}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../../scripts/config.sh"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
 PAYLOAD="$WORK/payload"
 mkdir -p "$PAYLOAD"
-
 cp -R "$APP_PATH" "$PAYLOAD/"
+chmod +x "$PAYLOAD/$(basename "$APP_PATH")/Contents/MacOS/$EXECUTABLE"
 
-if [ -d "$SWIFT_SUPPORT" ] && [ -n "$(ls -A "$SWIFT_SUPPORT" 2>/dev/null)" ]; then
-  cp -R "$SWIFT_SUPPORT" "$PAYLOAD/SwiftSupport"
-fi
+# Fill the app name into the installer text.
+RES="$WORK/resources"
+mkdir -p "$RES"
+for f in "$SCRIPT_DIR"/resources/*.html; do
+  sed -e "s|__APP_NAME__|$APP_NAME|g" -e "s|__EXECUTABLE__|$EXECUTABLE|g" "$f" > "$RES/$(basename "$f")"
+done
 
-COMPONENT_PKG="$WORK/component.pkg"
+# The postinstall script gets the identifiers it needs baked in.
+SCRIPTS="$WORK/scripts"
+mkdir -p "$SCRIPTS"
+sed -e "s|__APP_NAME__|$APP_NAME|g" -e "s|__EXECUTABLE__|$EXECUTABLE|g" -e "s|__LEGACY_APP__|$LEGACY_APP|g" \
+    -e "s|__LEGACY_EXECUTABLE__|$LEGACY_EXECUTABLE|g" -e "s|__LEGACY_PKG_ID__|$LEGACY_PKG_ID|g" \
+    "$SCRIPT_DIR/scripts/postinstall" > "$SCRIPTS/postinstall"
+chmod +x "$SCRIPTS/postinstall"
+
 pkgbuild \
   --root "$PAYLOAD" \
-  --identifier "com.lennylxx.inputmethod.GoogleInputTools" \
+  --identifier "$BUNDLE_ID" \
   --version "$VERSION" \
   --install-location "/Library/Input Methods" \
-  --scripts "$SCRIPT_DIR/scripts" \
-  "$COMPONENT_PKG"
+  --scripts "$SCRIPTS" \
+  "$WORK/component.pkg"
 
-DIST_XML="$WORK/distribution.xml"
-cat > "$DIST_XML" <<EOF
+cat > "$WORK/distribution.xml" <<XML
 <?xml version="1.0" encoding="utf-8"?>
 <installer-gui-script minSpecVersion="2">
-  <title>Google Input Tools</title>
-  <organization>com.lennylxx.inputmethod</organization>
+  <title>$APP_NAME</title>
+  <organization>io.veez</organization>
   <domains enable_localSystem="true"/>
-  <options customize="never" require-scripts="true" hostArchitectures="${ARCH}"/>
+  <options customize="never" require-scripts="true" hostArchitectures="arm64,x86_64"/>
   <welcome file="welcome.html" mime-type="text/html"/>
   <conclusion file="conclusion.html" mime-type="text/html"/>
   <choices-outline>
     <line choice="default">
-      <line choice="com.lennylxx.inputmethod.GoogleInputTools"/>
+      <line choice="$BUNDLE_ID"/>
     </line>
   </choices-outline>
   <choice id="default"/>
-  <choice id="com.lennylxx.inputmethod.GoogleInputTools" visible="false">
-    <pkg-ref id="com.lennylxx.inputmethod.GoogleInputTools"/>
+  <choice id="$BUNDLE_ID" visible="false">
+    <pkg-ref id="$BUNDLE_ID"/>
   </choice>
-  <pkg-ref id="com.lennylxx.inputmethod.GoogleInputTools" version="${VERSION}" onConclusion="none">component.pkg</pkg-ref>
+  <pkg-ref id="$BUNDLE_ID" version="$VERSION" onConclusion="none">component.pkg</pkg-ref>
 </installer-gui-script>
-EOF
+XML
+
+SIGN=()
+[ -n "$IDENTITY" ] && SIGN=(--sign "$IDENTITY" --timestamp)
 
 productbuild \
-  --distribution "$DIST_XML" \
-  --resources "$SCRIPT_DIR/resources" \
+  --distribution "$WORK/distribution.xml" \
+  --resources "$RES" \
   --package-path "$WORK" \
+  ${SIGN[@]+"${SIGN[@]}"} \
   "$OUTPUT"
 
-echo "Built ${OUTPUT}"
+echo "Built $OUTPUT"

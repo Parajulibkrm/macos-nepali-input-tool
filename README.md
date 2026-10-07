@@ -1,87 +1,55 @@
-# Google Input Tools for macOS
+# Nepali Input for macOS
 
-[![Build Status](https://github.com/ParajuliBkrm/macos-nepali-input-tool/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/ParajuliBkrm/macos-nepali-input-tool/actions/workflows/build.yml?query=branch%3Amain)
+A macOS input method for Nepali with two features:
 
-A english-nepali transliteration *cloud* input method that uses [Google Input Tools](https://www.google.com/inputtools/) as engine for macOS.
+1. **Typing**: type romanized words ("namaste") and pick Devanagari suggestions, powered by [Google Input Tools](https://www.google.com/inputtools/).
+2. **Dictation**: hold **Right Option**, speak, release, and the text is typed at the cursor. It uses Google's speech engine (the one behind Chrome's voice input), free. The default language is Nepali; English and Hindi are in the menu.
 
+> "Nepali Input" is a placeholder name. Both features use unofficial Google endpoints that can change or rate-limit at any time.
 
 ## Install
 
 ### Option 1: Installer package (recommended)
 
-1. Download the latest installer for your Mac from the [Releases page](https://github.com/ParajuliBkrm/macos-nepali-input-tool/releases/latest):
-   - Apple Silicon (M1/M2/M3/M4): `GoogleInputTools-arm64.pkg`
-   - Intel: `GoogleInputTools-x86_64.pkg`
+1. Download `NepaliInput.pkg` from the [Releases page](https://github.com/ParajuliBkrm/macos-nepali-input-tool/releases/latest). It is universal (Apple Silicon and Intel).
+2. Double-click it and follow the prompts. It installs into `/Library/Input Methods/`.
+3. Open `System Settings` → `Keyboard` → `Input Sources`, click `+`, choose `Nepali` → `Nepali Input`.
 
-2. Double-click the `.pkg` and follow the prompts. The installer places the input method into `/Library/Input Methods/`.
-
-3. Open `System Settings` → `Keyboard` → `Input Sources`, click `+`, choose `English` → `Google Input Tools`.
-
-> The build is unsigned. If macOS blocks the installer, right-click the `.pkg` → `Open`, or allow it from `System Settings` → `Privacy & Security`. If the input method does not show up in the list, log out and log back in.
+If the input method does not show up, log out and log back in.
 
 ### Option 2: Homebrew
 
-This repository doubles as a Homebrew tap. First-time install:
-
 ```sh
 brew tap parajulibkrm/macos-nepali-input-tool https://github.com/ParajuliBkrm/macos-nepali-input-tool
-brew install --cask parajulibkrm/macos-nepali-input-tool/google-input-tools
+brew install --cask parajulibkrm/macos-nepali-input-tool/nepali-input
 ```
 
-To upgrade later:
-
-```sh
-brew upgrade --cask parajulibkrm/macos-nepali-input-tool/google-input-tools
-```
-
-Then enable it from `System Settings` → `Keyboard` → `Input Sources` as above.
+Upgrade with `brew upgrade --cask parajulibkrm/macos-nepali-input-tool/nepali-input`, then add the keyboard as above.
 
 ### Option 3: Build from source
 
-1. Install Xcode 12.5.0+.
+Needs Xcode command line tools and an Apple Development certificate (a stable signature keeps the Microphone and Accessibility permissions across rebuilds).
 
-2. Clone and build the project.
+```sh
+git clone https://github.com/ParajuliBkrm/macos-nepali-input-tool.git
+cd macos-nepali-input-tool
+scripts/dev-install.sh   # installs into ~/Library/Input Methods
+```
 
-  ```
-  git clone https://github.com/ParajuliBkrm/macos-nepali-input-tool.git
-  cd macos-nepali-input-tool
-  ./build.sh
-  ```
+Maintainers: `scripts/release.sh` builds the universal, signed and notarized pkg into `dist/` (see the header of the script for the environment it reads).
 
-  If you get this error:
+## Dictation
 
-  ```
-   xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory '/Library/Developer/CommandLineTools' is a command line tools instance
-  ```
-
-  then run:
-
-  ```
-  sudo xcode-select -r
-  ```
-
-> The output will be `~/Library/Input Methods/GoogleInputTools.app`.
-
-3. Open `System Settings` → `Keyboard` → `Input Sources`, click `+`, choose `English` → `Google Input Tools`.
+Hold **Right Option**, speak, release. Press any other key while holding to cancel. The first use asks for the microphone. If another keyboard is active, the text is pasted instead, which needs Accessibility permission.
 
 ## Uninstall
 
-If you installed via the `.pkg` or Homebrew cask:
-
-  ```
-  brew uninstall --cask google-input-tools  # Homebrew users only
-  sudo rm -rf "/Library/Input Methods/GoogleInputTools.app"
-  sudo rm -rf "/Library/Input Methods/SwiftSupport"
-  sudo pkgutil --forget com.lennylxx.inputmethod.GoogleInputTools
-  ```
-
-If you installed manually or built from source:
-
-  ```
-  rm -rf ~/Library/Input\ Methods/GoogleInputTools.app
-  rm -rf ~/Library/Input\ Methods/SwiftSupport
-  rm -rf ~/Library/Input\ Methods/GoogleInputTools.swiftmodule
-  ```
+```sh
+brew uninstall --cask nepali-input                       # Homebrew users only
+sudo rm -rf "/Library/Input Methods/Nepali Input.app"    # pkg installs
+sudo pkgutil --forget io.veez.inputmethod.NepaliInput
+rm -rf ~/Library/Input\ Methods/Nepali\ Input.app        # dev-install
+```
 
 ## Screenshot
 

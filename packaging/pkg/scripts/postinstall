@@ -1,12 +1,20 @@
 #!/usr/bin/env bash
-set -e
+# Runs as root after the app is copied into /Library/Input Methods.
 
-# Stop any running instance so the freshly installed bundle is picked up
-# the next time the input method server launches it.
-killall -9 GoogleInputTools 2>/dev/null || true
+# Remove the previous GoogleInputTools identity, if present.
+killall -9 __LEGACY_EXECUTABLE__ 2>/dev/null || true
+rm -rf "/Library/Input Methods/__LEGACY_APP__"
+USER_HOME="$(dscl . -read "/Users/$(stat -f%Su /dev/console)" NFSHomeDirectory 2>/dev/null | awk '{print $2}')"
+[ -n "$USER_HOME" ] && rm -rf "$USER_HOME/Library/Input Methods/__LEGACY_APP__"
+pkgutil --forget __LEGACY_PKG_ID__ >/dev/null 2>&1 || true
 
-# Nudge the preferences daemon so the new input source shows up in
-# System Settings without requiring a logout.
+# Issue #3: the executable lost its execute bit on some installs, so macOS never launched it.
+chmod +x "/Library/Input Methods/__APP_NAME__.app/Contents/MacOS/__EXECUTABLE__" 2>/dev/null || true
+
+# Stop any running instance so the new bundle is launched next time.
+killall -9 __EXECUTABLE__ 2>/dev/null || true
+
+# Nudge the preferences daemon so the input source shows up without a logout.
 killall -HUP cfprefsd 2>/dev/null || true
 
 exit 0

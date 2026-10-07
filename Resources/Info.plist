@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key>
+    <string>__BUNDLE_ID__</string>
+    <key>CFBundleName</key>
+    <string>__APP_NAME__</string>
+    <key>CFBundleDisplayName</key>
+    <string>__APP_NAME__</string>
+    <key>CFBundleExecutable</key>
+    <string>__EXECUTABLE__</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleShortVersionString</key>
+    <string>__VERSION__</string>
+    <key>CFBundleVersion</key>
+    <string>__BUILD_NUMBER__</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>13.0</string>
+    <key>LSUIElement</key>
+    <true/>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+    <key>InputMethodConnectionName</key>
+    <string>__BUNDLE_ID___Connection</string>
+    <key>InputMethodServerControllerClass</key>
+    <string>InputController</string>
+    <key>tsInputMethodCharacterRepertoireKey</key>
+    <array>
+        <string>ne-NP</string>
+    </array>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>While you hold Right Option, your voice is recorded and sent to Google for transcription.</string>
+</dict>
+</plist>

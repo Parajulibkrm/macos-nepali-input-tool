@@ -1,23 +1,34 @@
 import Foundation
 import InputMethodKit
 
-class GoogleInputToolsController: IMKInputController {
+@objc(InputController)
+class InputController: IMKInputController {
 
+    /// The controller of the text field currently using this keyboard, if any.
+    static weak var active: InputController?
+
+    private static var sharedCandidates: IMKCandidates?
     private let candidates: IMKCandidates
     private var isActive: Bool = false
 
     override init!(server: IMKServer, delegate: Any, client inputClient: Any) {
         NSLog("\(#function)(\(inputClient))")
 
-        self.candidates = IMKCandidates(
-            server: server, panelType: kIMKSingleRowSteppingCandidatePanel)
+        // One panel for the whole process. IMK keeps an unretained reference to every
+        // IMKCandidates created on the server and asks it `isVisible` when a keyboard
+        // deactivates; a per-controller panel is freed with its controller, so that call
+        // landed on a dead object (EXC_BAD_ACCESS in deactivateServer, issues #1 and #2).
+        if Self.sharedCandidates == nil {
+            Self.sharedCandidates = IMKCandidates(
+                server: server, panelType: kIMKSingleRowSteppingCandidatePanel)
+        }
+        self.candidates = Self.sharedCandidates!
 
         super.init(server: server, delegate: delegate, client: inputClient)
     }
 
     override func client() -> (IMKTextInput & NSObjectProtocol)! {
         let c = super.client()
-        NSLog("client=\(c)")
         return c
     }
 
@@ -29,6 +40,7 @@ class GoogleInputToolsController: IMKInputController {
         NSLog("\(#function)(\(client))")
 
         isActive = true
+        Self.active = self
         client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
     }
 
@@ -40,6 +52,7 @@ class GoogleInputToolsController: IMKInputController {
         NSLog("\(#function)(\(client))")
 
         isActive = false
+        if Self.active === self { Self.active = nil }
         InputContext.shared.clean()
         if !UISettings.SystemUI {
             CandidatesWindow.shared.hide()
@@ -58,7 +71,6 @@ class GoogleInputToolsController: IMKInputController {
                       compString == InputContext.shared.composeString else {
                     return
                 }
-                NSLog("main thread candidates: \(candidates)")
 
                 InputContext.shared.candidates = candidates
                 InputContext.shared.matchedLength = matchedLength
@@ -77,7 +89,6 @@ class GoogleInputToolsController: IMKInputController {
         NSLog("\(#function)")
 
         let compString = InputContext.shared.composeString
-        NSLog("compString=\(compString)")
 
         // set text at cursor
         let range = NSMakeRange(NSNotFound, NSNotFound)
@@ -124,14 +135,11 @@ class GoogleInputToolsController: IMKInputController {
         let candidate = InputContext.shared.candidates[index]
         let matched = InputContext.shared.matchedLength?[index] ?? compString.count
 
-        NSLog("compString=\(compString), length=\(compString.count)")
-        NSLog("currentIndex=\(index), currentCandidate=\(candidate), matchedLength=\(matched)")
 
         let fromIndex = compString.index(
             compString.endIndex, offsetBy: matched - compString.count)
         let remain = compString[fromIndex...]
 
-        NSLog("fromIndex=\(fromIndex.utf16Offset(in: compString)), remain=\(remain)")
 
         client().insertText(candidate, replacementRange: NSMakeRange(0, matched))
         let range = NSMakeRange(NSNotFound, NSNotFound)
@@ -158,7 +166,6 @@ class GoogleInputToolsController: IMKInputController {
         let candidate = candidateString?.string ?? ""
         let id = InputContext.shared.candidates.firstIndex(of: candidate) ?? 0
 
-        NSLog("candidate=\(candidate), index=\(id)")
         InputContext.shared.currentIndex = id
         commitCandidate(client: self.client())
     }
@@ -169,7 +176,6 @@ class GoogleInputToolsController: IMKInputController {
         let candidate = candidateString?.string ?? ""
         let id = InputContext.shared.candidates.firstIndex(of: candidate) ?? 0
 
-        NSLog("candidate=\(candidate), index=\(id)")
         InputContext.shared.currentIndex = id
     }
 
@@ -191,8 +197,43 @@ class GoogleInputToolsController: IMKInputController {
         return NSMakeRange(NSNotFound, NSNotFound)
     }
 
+    override func recognizedEvents(_ sender: Any!) -> Int {
+        Int(NSEvent.EventTypeMask([.keyDown, .flagsChanged]).rawValue)
+    }
+
+    override func menu() -> NSMenu! {
+        let menu = NSMenu()
+        DictationController.shared.populate(menu, target: self, action: #selector(dictationMenuAction(_:)))
+        return menu
+    }
+
+    /// Input-method menu actions arrive here with a dictionary describing the chosen item.
+    @objc func dictationMenuAction(_ sender: Any) {
+        let item = (sender as? [String: Any])?[kIMKCommandMenuItemName] as? NSMenuItem ?? sender as? NSMenuItem
+        if let item { DictationController.shared.menuAction(item) }
+    }
+
+    /// Types dictated text straight into the client, finishing any word being composed first.
+    func insertDictation(_ text: String) -> Bool {
+        guard isActive, let client = client() else { return false }
+        if !InputContext.shared.composeString.isEmpty {
+            commitComposedString(client: client)
+        }
+        client.insertText(text, replacementRange: NSMakeRange(NSNotFound, NSNotFound))
+        return true
+    }
+
     override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
-        NSLog("%@", event)
+        // Right Option hold-to-talk works here even without Accessibility.
+        DictationController.shared.hotkey.feed(event)
+
+        // ⌘ and ⌃ shortcuts are handled by the app before they reach us as key events, so the
+        // modifier going down is our only cue that the word being typed is over.
+        if event.type == .flagsChanged,
+           !event.modifierFlags.intersection([.command, .control]).isEmpty,
+           !InputContext.shared.composeString.isEmpty {
+            commitComposedString(client: sender)
+        }
 
         if event.type == NSEvent.EventType.keyDown {
             //check if the key is a modifier key
@@ -201,12 +242,17 @@ class GoogleInputToolsController: IMKInputController {
                 event.modifierFlags.contains(NSEvent.ModifierFlags.option) ||
                 event.modifierFlags.contains(NSEvent.ModifierFlags.shift)
             {
+                // A shortcut (⌘A, ⌃…, ⌥…) ends the word being typed; otherwise the stale
+                // composition would swallow the next Delete/Return after the shortcut.
+                if !event.modifierFlags.contains(.shift) || event.modifierFlags.contains(.command),
+                   !InputContext.shared.composeString.isEmpty {
+                    commitComposedString(client: sender)
+                }
                 return false
             }
-            let inputString = event.characters!
-            let key = inputString.first!
-
-            NSLog("key=%@", String(key))
+            guard let inputString = event.characters, let key = inputString.first else {
+                return false
+            }
 
             if key.isLetter {
                 InputContext.shared.composeString.append(inputString)

@@ -1,193 +1,73 @@
-name: CI
- 
+name: Release
+
 on:
   # Manual trigger only — run from the Actions tab
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        arch: [x86_64, arm64]
-
-    steps:
-      # Checks-out repository under $GITHUB_WORKSPACE
-      - uses: actions/checkout@v4
-
-      - name: Xcodebuild Action
-        uses: sersoft-gmbh/xcodebuild-action@v1.6.0
-        with:
-          project: GoogleInputTools.xcodeproj
-          scheme: GoogleInputTools
-          configuration: Release
-          arch: ${{ matrix.arch }}
-          action: build
-          use-xcpretty: false
-          derived-data-path: ./DerivedData
-
-      # Debug step to check build output location
-      - name: Debug - List build directories
-        run: |
-          echo "Listing current directory:"
-          ls -la
-          echo "Listing DerivedData directory:"
-          ls -R ./DerivedData
-          
-      - name: Prepare build artifacts
-        run: |
-          mkdir -p build/Release
-          
-          # Find and copy the .app bundle
-          find ./DerivedData -name "*.app" -exec cp -R {} build/Release/ \;
-          
-          # Find and copy all Swift module files
-          mkdir -p build/Release/SwiftSupport
-          find ./DerivedData -name "*.swiftmodule" -exec cp -R {} build/Release/SwiftSupport/ \;
-          
-          echo "Contents of build/Release directory:"
-          ls -la build/Release/
-          echo "Contents of SwiftSupport directory:"
-          ls -la build/Release/SwiftSupport/
-          
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-${{ matrix.arch }}
-          path: build/Release/
-          retention-days: 1
-
   release:
-    needs: build
     runs-on: macos-latest
-    if: github.ref == 'refs/heads/main'
     permissions:
       contents: write
+    env:
+      NOTARY_PROFILE: ci
     steps:
       - uses: actions/checkout@v4
-      
-      # Create directories
-      - name: Create directories
-        run: mkdir -p dist/{x86_64,arm64}
 
-      # Download Intel build
-      - name: Download x86_64 build
-        uses: actions/download-artifact@v4
-        with:
-          name: build-x86_64
-          path: dist/x86_64
-          
-      # Verify x86_64 download
-      - name: Verify x86_64 download
-        run: |
-          if [ ! -d "dist/x86_64" ] || [ -z "$(ls -A dist/x86_64)" ]; then
-            echo "Error: x86_64 build artifacts not found"
-            exit 1
-          fi
-          echo "Contents of x86_64 directory:"
-          ls -R dist/x86_64
-          # Verify SwiftSupport exists
-          if [ ! -d "dist/x86_64/SwiftSupport" ]; then
-            echo "Error: SwiftSupport directory not found in x86_64 build"
-            exit 1
-          fi
-
-      # Download Apple Silicon build
-      - name: Download arm64 build
-        uses: actions/download-artifact@v4
-        with:
-          name: build-arm64
-          path: dist/arm64
-          
-      # Verify arm64 download
-      - name: Verify arm64 download
-        run: |
-          if [ ! -d "dist/arm64" ] || [ -z "$(ls -A dist/arm64)" ]; then
-            echo "Error: arm64 build artifacts not found"
-            exit 1
-          fi
-          echo "Contents of arm64 directory:"
-          ls -R dist/arm64
-          # Verify SwiftSupport exists
-          if [ ! -d "dist/arm64/SwiftSupport" ]; then
-            echo "Error: SwiftSupport directory not found in arm64 build"
-            exit 1
-          fi
-
-      # Debug step to check downloaded artifacts
-      - name: Debug - List dist directory
-        run: |
-          ls -R dist/
-
-      # Create versioned release tag
-      - name: Generate release tag
-        id: tag
-        run: |
-          version="$(date +'%Y.%m.%d-%H%M')"
-          echo "release_tag=release-${version}" >> $GITHUB_OUTPUT
-          echo "version=${version}" >> $GITHUB_OUTPUT
-
-      # Build .pkg installers
-      - name: Build .pkg installers
+      # Secrets (set in the repo settings):
+      #   APP_CERT_P12 / INSTALLER_CERT_P12  base64 of the exported .p12 files
+      #   CERT_PASSWORD                      their password
+      #   NOTARY_APPLE_ID, NOTARY_PASSWORD   Apple ID + app-specific password
+      #   NOTARY_TEAM_ID                     T2SGYX37P4
+      - name: Import signing certificates
         run: |
           set -euo pipefail
-          for arch in x86_64 arm64; do
-            ./packaging/pkg/build-pkg.sh \
-              "dist/${arch}/GoogleInputTools.app" \
-              "dist/${arch}/SwiftSupport" \
-              "${arch}" \
-              "${{ steps.tag.outputs.version }}" \
-              "dist/GoogleInputTools-${arch}.pkg"
+          KC="$RUNNER_TEMP/build.keychain"
+          security create-keychain -p ci "$KC"
+          security set-keychain-settings -lut 21600 "$KC"
+          security unlock-keychain -p ci "$KC"
+          security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
+          for var in APP_CERT_P12 INSTALLER_CERT_P12; do
+            echo "${!var}" | base64 --decode > "$RUNNER_TEMP/$var.p12"
+            security import "$RUNNER_TEMP/$var.p12" -k "$KC" -P "$CERT_PASSWORD" -T /usr/bin/codesign -T /usr/bin/productbuild
           done
+          security set-key-partition-list -S apple-tool:,apple: -s -k ci "$KC"
+          xcrun notarytool store-credentials "$NOTARY_PROFILE" \
+            --apple-id "$NOTARY_APPLE_ID" --password "$NOTARY_PASSWORD" --team-id "$NOTARY_TEAM_ID"
+        env:
+          APP_CERT_P12: ${{ secrets.APP_CERT_P12 }}
+          INSTALLER_CERT_P12: ${{ secrets.INSTALLER_CERT_P12 }}
+          CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
+          NOTARY_APPLE_ID: ${{ secrets.NOTARY_APPLE_ID }}
+          NOTARY_PASSWORD: ${{ secrets.NOTARY_PASSWORD }}
+          NOTARY_TEAM_ID: ${{ secrets.NOTARY_TEAM_ID }}
 
-      # Verify pkgs and compute checksums for the Homebrew cask
-      - name: Verify pkgs and compute checksums
-        id: checksums
+      - name: Generate version
+        id: tag
+        run: echo "version=$(date +'%Y.%m.%d-%H%M')" >> "$GITHUB_OUTPUT"
+
+      - name: Build, sign and notarize
         run: |
-          set -euo pipefail
-          if [ ! -f "dist/GoogleInputTools-x86_64.pkg" ] || [ ! -f "dist/GoogleInputTools-arm64.pkg" ]; then
-            echo "Error: pkg installers not created successfully"
-            exit 1
-          fi
-          ls -lh dist/*.pkg
-          intel_sha="$(shasum -a 256 dist/GoogleInputTools-x86_64.pkg | awk '{print $1}')"
-          arm_sha="$(shasum -a 256 dist/GoogleInputTools-arm64.pkg | awk '{print $1}')"
-          echo "intel_sha=${intel_sha}" >> $GITHUB_OUTPUT
-          echo "arm_sha=${arm_sha}" >> $GITHUB_OUTPUT
+          VERSION="${{ steps.tag.outputs.version }}" scripts/release.sh
+          mv dist/NepaliInput-*.pkg dist/NepaliInput.pkg
 
-      # Create GitHub release
       - name: Create Release
-        id: create_release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.tag.outputs.release_tag }}
-          name: Release ${{ steps.tag.outputs.release_tag }}
+          tag_name: release-${{ steps.tag.outputs.version }}
+          name: Release ${{ steps.tag.outputs.version }}
           body: |
-            GoogleInputTools Input Method for macOS
+            Nepali typing and voice dictation for macOS (universal: Apple Silicon and Intel).
 
-            **Install (recommended):** download the matching `.pkg`, double-click it, follow the prompts.
+            **Install:** download `NepaliInput.pkg`, double-click it, then add the keyboard in
+            **System Settings → Keyboard → Input Sources → + → Nepali → Nepali Input**.
 
-            - Apple Silicon (M1/M2/M3/M4): `GoogleInputTools-arm64.pkg`
-            - Intel: `GoogleInputTools-x86_64.pkg`
-
-            After install, open **System Settings → Keyboard → Input Sources**, click **+**, and choose **English → Google Input Tools**.
-
-            > The build is unsigned. On first launch, right-click the `.pkg` → **Open**, or allow it from **System Settings → Privacy & Security**.
-
-            **Install via Homebrew (this repo doubles as a tap):**
+            **Homebrew:**
 
             ```sh
             brew tap parajulibkrm/macos-nepali-input-tool https://github.com/${{ github.repository }}
-            brew install --cask parajulibkrm/macos-nepali-input-tool/google-input-tools
+            brew install --cask parajulibkrm/macos-nepali-input-tool/nepali-input
             ```
-
-            SHA-256 checksums:
-            - `GoogleInputTools-arm64.pkg`: `${{ steps.checksums.outputs.arm_sha }}`
-            - `GoogleInputTools-x86_64.pkg`: `${{ steps.checksums.outputs.intel_sha }}`
-          draft: false
-          prerelease: false
-          files: |
-            ./dist/GoogleInputTools-x86_64.pkg
-            ./dist/GoogleInputTools-arm64.pkg
+          files: ./dist/NepaliInput.pkg
