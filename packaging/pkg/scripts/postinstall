@@ -10,6 +10,7 @@ pkgutil --forget __LEGACY_PKG_ID__ >/dev/null 2>&1 || true
 
 # Issue #3: the executable lost its execute bit on some installs, so macOS never launched it.
 chmod +x "/Library/Input Methods/__APP_NAME__.app/Contents/MacOS/__EXECUTABLE__" 2>/dev/null || true
+chmod +x "/Applications/__APP_NAME__.app/Contents/MacOS/__EXECUTABLE__Launcher" 2>/dev/null || true
 
 # Stop any running instance so the new bundle is launched next time.
 killall -9 __EXECUTABLE__ 2>/dev/null || true

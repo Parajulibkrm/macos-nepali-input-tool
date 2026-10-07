@@ -7,5 +7,7 @@ let server = IMKServer(name: connectionName, bundleIdentifier: Bundle.main.bundl
 
 let app = NSApplication.shared
 app.setActivationPolicy(.accessory)
+let appDelegate = AppDelegate()
+app.delegate = appDelegate
 DictationController.shared.start()
 app.run()

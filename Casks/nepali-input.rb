@@ -11,9 +11,15 @@ cask "nepali-input" do
 
   uninstall quit:    "io.veez.inputmethod.NepaliInput",
             pkgutil: "io.veez.inputmethod.NepaliInput",
-            delete:  "/Library/Input Methods/Nepali Input.app"
+            delete:  [
+              "/Library/Input Methods/Nepali Input.app",
+              "/Applications/Nepali Input.app",
+            ]
 
-  zap trash: "~/Library/Input Methods/Nepali Input.app"
+  zap trash: [
+    "~/Library/Input Methods/Nepali Input.app",
+    "~/Applications/Nepali Input.app",
+  ]
 
   caveats <<~EOS
     After installation, add the keyboard:

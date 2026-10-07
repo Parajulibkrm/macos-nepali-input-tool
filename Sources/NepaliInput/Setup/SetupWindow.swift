@@ -59,7 +59,7 @@ final class SetupModel: ObservableObject {
         return list.first
     }
 
-    private static func currentKeyboardBundleID() -> String? {
+    static func currentKeyboardBundleID() -> String? {
         let current = TISCopyCurrentKeyboardInputSource().takeRetainedValue()
         guard let raw = TISGetInputSourceProperty(current, kTISPropertyBundleID) else { return nil }
         return Unmanaged<CFString>.fromOpaque(raw).takeUnretainedValue() as String

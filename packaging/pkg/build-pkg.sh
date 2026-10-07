@@ -2,16 +2,18 @@
 set -euo pipefail
 
 # Builds the installer .pkg (universal, one package for both architectures).
-# Usage: build-pkg.sh <app-path> <output-pkg> [installer-identity]
+# Usage: build-pkg.sh <app-path> <launcher-path> <output-pkg> [installer-identity]
+#   app-path / launcher-path  the input method, and the Spotlight stand-in installed in /Applications
 #   installer-identity  "Developer ID Installer: …"; the pkg is left unsigned when omitted.
-if [ "$#" -lt 2 ]; then
-  echo "Usage: $0 <app-path> <output-pkg> [installer-identity]" >&2
+if [ "$#" -lt 3 ]; then
+  echo "Usage: $0 <app-path> <launcher-path> <output-pkg> [installer-identity]" >&2
   exit 1
 fi
 
 APP_PATH="$1"
-OUTPUT="$2"
-IDENTITY="${3:-}"
+LAUNCHER_PATH="$2"
+OUTPUT="$3"
+IDENTITY="${4:-}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../../scripts/config.sh"
@@ -19,9 +21,15 @@ WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
 PAYLOAD="$WORK/payload"
-mkdir -p "$PAYLOAD"
-cp -R "$APP_PATH" "$PAYLOAD/"
-chmod +x "$PAYLOAD/$(basename "$APP_PATH")/Contents/MacOS/$EXECUTABLE"
+mkdir -p "$PAYLOAD/Library/Input Methods" "$PAYLOAD/Applications"
+cp -R "$APP_PATH" "$PAYLOAD/Library/Input Methods/"
+cp -R "$LAUNCHER_PATH" "$PAYLOAD/Applications/"
+chmod +x "$PAYLOAD/Library/Input Methods/$(basename "$APP_PATH")/Contents/MacOS/$EXECUTABLE"
+chmod +x "$PAYLOAD/Applications/$(basename "$LAUNCHER_PATH")/Contents/MacOS/${EXECUTABLE}Launcher"
+
+# Keep the bundles where we put them; the installer must not relocate them to an older copy.
+pkgbuild --analyze --root "$PAYLOAD" "$WORK/components.plist" >/dev/null
+for i in 0 1; do plutil -replace "$i.BundleIsRelocatable" -bool false "$WORK/components.plist" 2>/dev/null || true; done
 
 # Fill the app name into the installer text.
 RES="$WORK/resources"
@@ -42,7 +50,8 @@ pkgbuild \
   --root "$PAYLOAD" \
   --identifier "$BUNDLE_ID" \
   --version "$VERSION" \
-  --install-location "/Library/Input Methods" \
+  --install-location "/" \
+  --component-plist "$WORK/components.plist" \
   --scripts "$SCRIPTS" \
   "$WORK/component.pkg"
 

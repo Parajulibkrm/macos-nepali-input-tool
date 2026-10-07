@@ -22,7 +22,7 @@ Requires macOS 13 or later (Apple Silicon and Intel).
 3. Open **System Settings → Keyboard → Input Sources → Edit… → +**, choose **Nepali → Nepali Input**, and click **Add**.
 4. Pick **Nepali Input** from the input menu in the menu bar. The setup guide opens the first time and checks off each step as you finish it.
 
-If the keyboard isn't listed, log out and back in.
+If the keyboard isn't listed, log out and back in. The installer also puts a small **Nepali Input** entry in Applications, so Spotlight can find it; opening it shows the settings window.
 
 ### Homebrew
 
@@ -92,15 +92,15 @@ Both features use unofficial Google endpoints (the same ones Google Input Tools 
 - **Not in the keyboard list / does nothing:** log out and back in. The app lives in `/Library/Input Methods/` (installer) or `~/Library/Input Methods/` (source install). Make sure the file `Nepali Input.app/Contents/MacOS/NepaliInput` is executable.
 - **Dictation doesn't start with another keyboard:** grant Accessibility in System Settings → Privacy & Security.
 - **"Microphone is off":** System Settings → Privacy & Security → Microphone.
-- **Reopen the guide:** menu-bar mic icon → **Setup Guide…**
+- **Reopen the window:** search "Nepali Input" in Spotlight, or use the menu-bar mic icon → **Setup Guide…**
 
 ## Uninstall
 
 ```sh
 brew uninstall --cask nepali-input                       # Homebrew installs
-sudo rm -rf "/Library/Input Methods/Nepali Input.app"    # installer
+sudo rm -rf "/Library/Input Methods/Nepali Input.app" "/Applications/Nepali Input.app"    # installer
 sudo pkgutil --forget io.veez.inputmethod.NepaliInput
-rm -rf ~/Library/Input\ Methods/Nepali\ Input.app        # source install
+rm -rf ~/Library/Input\ Methods/Nepali\ Input.app ~/Applications/Nepali\ Input.app    # source install
 ```
 
 Then remove the keyboard under System Settings → Keyboard → Input Sources.

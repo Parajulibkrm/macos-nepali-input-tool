@@ -11,10 +11,15 @@ IDENTITY="${IDENTITY:-$(security find-identity -v -p codesigning | grep -m1 "App
 DEST="$HOME/Library/Input Methods"
 
 APP="$(scripts/make-bundle.sh .build/bundle | tail -1)"
+LAUNCHER=".build/bundle/launcher/$APP_NAME.app"
 codesign --force --options runtime --entitlements Resources/NepaliInput.entitlements --sign "$IDENTITY" "$APP"
+codesign --force --options runtime --sign "$IDENTITY" "$LAUNCHER"
 
 killall "$EXECUTABLE" 2>/dev/null || true
 rm -rf "$DEST/$APP_NAME.app"
 cp -R "$APP" "$DEST/"
+mkdir -p "$HOME/Applications"
+rm -rf "$HOME/Applications/$APP_NAME.app"
+cp -R "$LAUNCHER" "$HOME/Applications/"
 echo "Installed $DEST/$APP_NAME.app (signed by $IDENTITY)"
 echo "First time: System Settings → Keyboard → Input Sources → + → Nepali → $APP_NAME"

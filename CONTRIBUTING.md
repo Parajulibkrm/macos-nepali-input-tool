@@ -8,7 +8,8 @@ Sources/NepaliInput/
   main.swift                   debug commands → IMKServer → DictationController.start() → app.run()
   Typing/                      transliteration input method (IMKInputController, Google Input Tools client, candidate window)
   Dictation/                   hold-to-talk: hotkey, recorder, Google speech clients, overlay, delivery
-  Setup/                       SwiftUI window: setup guide and settings
+  Setup/                       SwiftUI window (setup guide and settings), app delegate (reopen shows it)
+Sources/NepaliInputLauncher/   tiny app installed in /Applications so Spotlight can find the input method
 Resources/                     Info.plist template, entitlements
 scripts/                       config.sh (name, bundle ID, version), dev-install.sh, make-bundle.sh, release.sh
 packaging/pkg/                 installer build and postinstall

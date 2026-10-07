@@ -14,16 +14,19 @@ NOTARY_PROFILE="${NOTARY_PROFILE:-}"
 
 mkdir -p dist
 APP="$(scripts/make-bundle.sh dist/bundle --universal | tail -1)"
+LAUNCHER="dist/bundle/launcher/$APP_NAME.app"
 
 if [ -n "$APP_IDENTITY" ]; then
   codesign --force --timestamp --options runtime --entitlements Resources/NepaliInput.entitlements --sign "$APP_IDENTITY" "$APP"
+  codesign --force --timestamp --options runtime --sign "$APP_IDENTITY" "$LAUNCHER"
   codesign --verify --strict --verbose=2 "$APP"
+  codesign --verify --strict --verbose=2 "$LAUNCHER"
 else
   echo "warning: no Developer ID Application identity, app is unsigned" >&2
 fi
 
 PKG="dist/$EXECUTABLE-$VERSION.pkg"
-packaging/pkg/build-pkg.sh "$APP" "$PKG" "$INSTALLER_IDENTITY"
+packaging/pkg/build-pkg.sh "$APP" "$LAUNCHER" "$PKG" "$INSTALLER_IDENTITY"
 
 if [ -n "$INSTALLER_IDENTITY" ] && [ -n "$NOTARY_PROFILE" ]; then
   xcrun notarytool submit "$PKG" --keychain-profile "$NOTARY_PROFILE" --wait

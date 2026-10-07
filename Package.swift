@@ -5,6 +5,7 @@ let package = Package(
     name: "NepaliInput",
     platforms: [.macOS(.v13)],
     targets: [
-        .executableTarget(name: "NepaliInput", path: "Sources/NepaliInput")
+        .executableTarget(name: "NepaliInput", path: "Sources/NepaliInput"),
+        .executableTarget(name: "NepaliInputLauncher", path: "Sources/NepaliInputLauncher"),
     ]
 )
